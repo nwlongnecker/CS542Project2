@@ -34,6 +34,8 @@ public class ValueStoreImpl implements IValueStore
 		// Make the database directory.
 		File databaseDir = new File(folder);
 		databaseDir.mkdir();
+		
+		// TODO If there are directories in this directory, then we should throw an exception
 	}
 	
 	@Override
@@ -51,7 +53,6 @@ public class ValueStoreImpl implements IValueStore
 		}
 		catch (IOException e)
 		{
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -75,7 +76,6 @@ public class ValueStoreImpl implements IValueStore
 			}
 			catch (IOException e)
 			{
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			
@@ -93,5 +93,28 @@ public class ValueStoreImpl implements IValueStore
 		// Delete the file for this key if it exists.
 		File dataFile = new File(databaseFolder + key);
 		dataFile.delete();
+	}
+	
+	/**
+	 * Deletes all traces of the database off the disk. Mostly used for cleaning up after tests.
+	 */
+	void cleanUp() {
+		// Delete the database directory.
+		File databaseDir = new File(databaseFolder);
+		deleteFolder(databaseDir);
+	}
+	
+	private void deleteFolder(File folder) {
+	    File[] files = folder.listFiles();
+	    if(files != null) { //some JVMs return null for empty dirs
+	        for(File f: files) {
+	            if(f.isDirectory()) {
+	                deleteFolder(f);
+	            } else {
+	                f.delete();
+	            }
+	        }
+	    }
+	    folder.delete();
 	}
 }
