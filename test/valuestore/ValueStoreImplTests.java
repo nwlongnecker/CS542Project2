@@ -71,9 +71,8 @@ public class ValueStoreImplTests {
 		File directory = new File(dbLoc);
 		// If the directory already exists, delete it
 		if(directory.exists()) {
-			assertTrue(directory.delete());
+			directory.delete();
 		}
-		assertFalse(directory.exists());
 		ValueStoreImpl vs = new ValueStoreImpl(dbLoc);
 		assertEquals(dbLoc + "/", vs.databaseFolder);
 		assertTrue(directory.exists());
@@ -271,6 +270,44 @@ public class ValueStoreImplTests {
 		vs.remove(1);
 		
 		assertFalse(newFile.exists());
+		// Delete the directory to clean up after the tests
+		vs.cleanUp();
+	}
+	
+	@Test
+	public void testGetFile() {
+		// Test that get gets the contents of a file
+		String dirName = "test6";
+		ValueStoreImpl vs = new ValueStoreImpl(dirName);
+		
+		int key = 2;
+		byte[] inData = "Contents".getBytes();
+		vs.put(key, inData);
+		
+		byte[] outData = vs.get(key);
+		
+		assertTrue(Arrays.equals(inData, outData));
+		// Delete the directory to clean up after the tests
+		vs.cleanUp();
+	}
+	
+	@Test
+	public void testGetFileDoesntExist() {
+		// Test that get returns null if the file doesn't exist
+		String dirName = "test7";
+		ValueStoreImpl vs = new ValueStoreImpl(dirName);
+		
+		int key = 4;
+		File newFile = new File(dirName + "/" + key);
+		// If the file exists, delete it
+		if(newFile.exists()) {
+			assertTrue(newFile.delete());
+			assertFalse(newFile.exists());
+		}
+		
+		byte[] outData = vs.get(key);
+		
+		assertNull(outData);
 		// Delete the directory to clean up after the tests
 		vs.cleanUp();
 	}
