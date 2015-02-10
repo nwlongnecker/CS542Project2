@@ -15,7 +15,7 @@ import static org.junit.Assert.*;
 public class ValueStoreImplTests {
 	
 	@Test
-	public void testInitalize() {
+	public void testInitalize() throws ValueStoreException {
 		// Create a file to represent the db loc
 		String dbLoc = "db";
 		File directory = new File(dbLoc);
@@ -33,7 +33,7 @@ public class ValueStoreImplTests {
 	}
 	
 	@Test
-	public void testInitalizeDefault() {
+	public void testInitalizeDefault() throws ValueStoreException {
 		File directory = new File(ValueStoreImpl.DEFAULT_LOCATION);
 		// If the directory already exists, delete it
 		if(directory.exists()) {
@@ -48,7 +48,7 @@ public class ValueStoreImplTests {
 	}
 	
 	@Test
-	public void testInitalizeFolderAlreadyExists() {
+	public void testInitalizeFolderAlreadyExists() throws ValueStoreException {
 		// Create a file to represent the db loc
 		String dbLoc = "db1";
 		File directory = new File(dbLoc);
@@ -66,8 +66,29 @@ public class ValueStoreImplTests {
 	}
 	
 	@Test
-	public void testCleanUp() {
+	public void testInitalizeFolderContainsDirectories() throws IOException, ValueStoreException {
+		// Create a file to represent the db loc
 		String dbLoc = "db2";
+		File directory = new File(dbLoc);
+		// If the directory already exists, delete it
+		if(!directory.exists()) {
+			directory.mkdir();
+			assertTrue(directory.exists());
+		}
+		new File(dbLoc + "/" + 1).mkdir();
+		new File(dbLoc + "/" + 3).createNewFile();
+		// Create a new database location
+		try {
+			new ValueStoreImpl(dbLoc);
+			fail();
+		} catch (ValueStoreException e) {
+			ValueStoreImpl.deleteFolder(directory);
+		}
+	}
+	
+	@Test
+	public void testCleanUp() throws ValueStoreException {
+		String dbLoc = "db3";
 		File directory = new File(dbLoc);
 		// If the directory already exists, delete it
 		if(directory.exists()) {
@@ -82,8 +103,8 @@ public class ValueStoreImplTests {
 	}
 	
 	@Test
-	public void testCleanUpWithContents() throws IOException {
-		String dbLoc = "db3";
+	public void testCleanUpWithContents() throws IOException, ValueStoreException {
+		String dbLoc = "db4";
 		File directory = new File(dbLoc);
 		// If the directory already exists, delete it
 		if(directory.exists()) {
@@ -99,9 +120,28 @@ public class ValueStoreImplTests {
 		vs.cleanUp();
 		assertFalse(directory.exists());
 	}
+	
+	@Test
+	public void testCleanUpWithDirectoriesAsContents() throws IOException, ValueStoreException {
+		String dbLoc = "db5";
+		File directory = new File(dbLoc);
+		// If the directory already exists, delete it
+		if(directory.exists()) {
+			assertTrue(directory.delete());
+		}
+		assertFalse(directory.exists());
+		ValueStoreImpl vs = new ValueStoreImpl(dbLoc);
+		assertEquals(dbLoc + "/", vs.databaseFolder);
+		assertTrue(directory.exists());
+		new File(dbLoc + "/" + 1).mkdir();
+		new File(dbLoc + "/" + 1).createNewFile();
+		// Delete the directory to clean up after the tests
+		vs.cleanUp();
+		assertFalse(directory.exists());
+	}
 
 	@Test
-	public void testPutNewFile() throws FileNotFoundException, IOException {
+	public void testPutNewFile() throws FileNotFoundException, IOException, ValueStoreException {
 		// Test that put creates a new file with specific contents
 		String dirName = "test1";
 		ValueStoreImpl vs = new ValueStoreImpl(dirName);
@@ -139,7 +179,7 @@ public class ValueStoreImplTests {
 	}
 	
 	@Test
-	public void testPutExistingFile() throws FileNotFoundException, IOException {
+	public void testPutExistingFile() throws FileNotFoundException, IOException, ValueStoreException {
 		// Test that put replaces an existing file
 		String dirName = "test2";
 		ValueStoreImpl vs = new ValueStoreImpl(dirName);
@@ -178,7 +218,7 @@ public class ValueStoreImplTests {
 	}
 	
 	@Test
-	public void testPutNonemptyExistingFile() throws FileNotFoundException, IOException {
+	public void testPutNonemptyExistingFile() throws FileNotFoundException, IOException, ValueStoreException {
 		// Test that put completely replaces the contents of a file
 		String dirName = "test3";
 		ValueStoreImpl vs = new ValueStoreImpl(dirName);
@@ -233,7 +273,7 @@ public class ValueStoreImplTests {
 	}
 	
 	@Test
-	public void testRemove() throws IOException {
+	public void testRemove() throws IOException, ValueStoreException {
 		// Test that remove deletes an existing file
 		String dirName = "test4";
 		ValueStoreImpl vs = new ValueStoreImpl(dirName);
@@ -254,7 +294,7 @@ public class ValueStoreImplTests {
 	}
 	
 	@Test
-	public void testRemoveInvalidFile() {
+	public void testRemoveInvalidFile() throws ValueStoreException {
 		// Test that remove deletes an existing file
 		String dirName = "test5";
 		ValueStoreImpl vs = new ValueStoreImpl(dirName);
@@ -275,7 +315,7 @@ public class ValueStoreImplTests {
 	}
 	
 	@Test
-	public void testGetFile() {
+	public void testGetFile() throws ValueStoreException {
 		// Test that get gets the contents of a file
 		String dirName = "test6";
 		ValueStoreImpl vs = new ValueStoreImpl(dirName);
@@ -292,7 +332,7 @@ public class ValueStoreImplTests {
 	}
 	
 	@Test
-	public void testGetFileDoesntExist() {
+	public void testGetFileDoesntExist() throws ValueStoreException {
 		// Test that get returns null if the file doesn't exist
 		String dirName = "test7";
 		ValueStoreImpl vs = new ValueStoreImpl(dirName);

@@ -17,8 +17,9 @@ public class ValueStoreImpl implements IValueStore
 	
 	/**
 	 * Default constructor, sets the database folder to "database".
+	 * @throws ValueStoreException If the specified directory is invalid
 	 */
-	public ValueStoreImpl()
+	public ValueStoreImpl() throws ValueStoreException
 	{
 		this(DEFAULT_LOCATION);
 	}
@@ -26,8 +27,9 @@ public class ValueStoreImpl implements IValueStore
 	/**
 	 * Constructor that allows the database folder to be specified.
 	 * @param folder Path to the folder to store database files.
+	 * @throws ValueStoreException If the specified directory is invalid
 	 */
-	public ValueStoreImpl(String folder)
+	public ValueStoreImpl(String folder) throws ValueStoreException
 	{	
 		databaseFolder = folder + "/";
 		
@@ -35,7 +37,14 @@ public class ValueStoreImpl implements IValueStore
 		File databaseDir = new File(folder);
 		databaseDir.mkdir();
 		
-		// TODO If there are directories in this directory, then we should throw an exception
+		File[] files = databaseDir.listFiles();
+	    if(files != null) { //some JVMs return null for empty dirs
+	        for(File f: files) {
+	            if(f.isDirectory()) {
+	                throw new ValueStoreException("Invalid database directory. Database directory cannot contain directories.");
+	            }
+	        }
+	    }
 	}
 	
 	@Override
@@ -104,7 +113,7 @@ public class ValueStoreImpl implements IValueStore
 		deleteFolder(databaseDir);
 	}
 	
-	private void deleteFolder(File folder) {
+	static void deleteFolder(File folder) {
 	    File[] files = folder.listFiles();
 	    if(files != null) { //some JVMs return null for empty dirs
 	        for(File f: files) {
