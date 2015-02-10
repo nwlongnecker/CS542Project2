@@ -1,6 +1,9 @@
 package valuestore;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 
 import org.junit.Test;
 
@@ -41,4 +44,27 @@ public class ValueStoreImplTests {
 		assertTrue(directory.delete());
 	}
 
+	@Test
+	public void testPutNewFile() throws FileNotFoundException, IOException {
+		ValueStoreImpl vs = new ValueStoreImpl();
+		
+		int key = 1;
+		File newFile = new File("" + key);
+		// If the file already exists, delete it
+		if(newFile.exists()) {
+			assertTrue(newFile.delete());
+		}
+		assertFalse(newFile.exists());
+		
+		vs.put(key, "Hello".getBytes());
+		
+		assertTrue(newFile.exists());
+		
+//		try(FileReader file = new FileReader("" + key)) {
+//			byte[] read
+//			assertEquals("Hello", file.r)
+//		}
+		
+		assertTrue(newFile.delete());
+	}
 }
