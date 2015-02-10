@@ -6,11 +6,12 @@ import java.io.IOException;
 
 public class ValueStoreImpl implements IValueStore
 {
-	private final String databaseFolder;
+	final String databaseFolder;
+	static final String DEFAULT_LOCATION = "database";
 	
 	public ValueStoreImpl()
 	{
-		this("database");
+		this(DEFAULT_LOCATION);
 	}
 
 	public ValueStoreImpl(String folder)
