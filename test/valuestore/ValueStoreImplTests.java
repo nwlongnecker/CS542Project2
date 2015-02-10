@@ -46,10 +46,11 @@ public class ValueStoreImplTests {
 
 	@Test
 	public void testPutNewFile() throws FileNotFoundException, IOException {
-		ValueStoreImpl vs = new ValueStoreImpl();
+		String dirName = "test1";
+		ValueStoreImpl vs = new ValueStoreImpl("test1");
 		
 		int key = 1;
-		File newFile = new File("" + key);
+		File newFile = new File(dirName + "/" + key);
 		// If the file already exists, delete it
 		if(newFile.exists()) {
 			assertTrue(newFile.delete());
