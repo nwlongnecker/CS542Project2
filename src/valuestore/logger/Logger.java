@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -94,8 +95,11 @@ public class Logger {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		
+		// Purely for convenience, would be removed in production code
+		prettyPrintLog();
 	}
-	
+
 	/**
 	 * Reads the log from a file on the disk
 	 */
@@ -109,6 +113,32 @@ public class Logger {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
+		}
+	}
+	
+	/**
+	 * Pretty prints the log to a file so humans can easily see what's in the log file
+	 */
+	private void prettyPrintLog() {
+		try (FileWriter writer = new FileWriter(logFile + ".txt")) {
+			writer.write("Operation ID\t\t\t\t\t\t\t->\tType\tFilename\t(Contents)\n\n");
+			for(Transaction t : log.values()) {
+				writer.write(t.getTransactionID().toString() + "\t->\t");
+				if(t instanceof WriteTransaction) {
+					WriteTransaction wt = (WriteTransaction) t;
+					writer.write("Write\t");
+					writer.write(wt.getFilename() + "\t");
+					writer.write(wt.getContents() + "\t");
+					
+				} else {
+					writer.write("Delete\t");
+					writer.write(t.getFilename() + "\t");
+				}
+				writer.write("\n");
+			}
+			writer.flush();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
 }

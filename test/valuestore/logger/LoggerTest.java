@@ -30,6 +30,7 @@ public class LoggerTest {
 	@After
 	public void tearDown() {
 		new File(logFile).delete();
+		new File(logFile + ".txt").delete();
 	}
 
 	@Test
@@ -80,5 +81,18 @@ public class LoggerTest {
 		}
 		assertEquals(t.getTransactionID(), storedValues.get(t.getTransactionID()).getTransactionID());
 		assertEquals(t.getFilename(), storedValues.get(t.getTransactionID()).getFilename());
+	}
+	
+	@Test
+	public void testWriteLogPrettyPrint() {
+		logger = new Logger("PrettyPrintLog");
+		Transaction t = new WriteTransaction("Filename", "Hello".getBytes());
+		logger.logTransaction(t);
+		t = new DeleteTransaction("name");
+		logger.logTransaction(t);
+		t = new WriteTransaction("OtherFilename", "LotsOfContentsOftheFilehere".getBytes());
+		logger.logTransaction(t);
+		new File("PrettyPrintLog").delete();
+		new File("PrettyPrintLog.txt").delete();
 	}
 }
