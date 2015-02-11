@@ -4,6 +4,11 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.UUID;
+
+import valuestore.logger.DeleteTransaction;
+import valuestore.logger.Logger;
+import valuestore.logger.WriteTransaction;
 
 /**
  * Represents an implementation of a data store that can keep
@@ -50,6 +55,9 @@ public class ValueStoreImpl implements IValueStore
 	@Override
 	public void put(int key, byte[] data)
 	{
+		// Log that we're going to do a write
+		UUID opid = Logger.getLogger().logTransaction(new WriteTransaction(databaseFolder + key, data));
+		
 		// Delete the file if it already exists.
 		File dataFile = new File(databaseFolder + key);
 		dataFile.delete();
@@ -64,11 +72,15 @@ public class ValueStoreImpl implements IValueStore
 		{
 			e.printStackTrace();
 		}
+		// Log that we've finished the write
+		Logger.getLogger().endTransaction(opid);
 	}
 
 	@Override
 	public byte[] get(int key)
 	{
+		// No logging necessary for read function
+		
 		// Check that a file exists for the key.
 		File dataFile = new File(databaseFolder + key);
 		if (dataFile.exists())
@@ -99,9 +111,15 @@ public class ValueStoreImpl implements IValueStore
 	@Override
 	public void remove(int key)
 	{
+		// Log that we're going to do a delete
+		UUID opid = Logger.getLogger().logTransaction(new DeleteTransaction(databaseFolder + key));
+		
 		// Delete the file for this key if it exists.
 		File dataFile = new File(databaseFolder + key);
 		dataFile.delete();
+		
+		// Log that we've finished the delete
+		Logger.getLogger().endTransaction(opid);
 	}
 	
 	/**
