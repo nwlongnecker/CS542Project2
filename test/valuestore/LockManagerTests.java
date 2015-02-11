@@ -2,8 +2,6 @@ package valuestore;
 
 import static org.junit.Assert.*;
 
-import java.util.concurrent.locks.ReadWriteLock;
-
 import org.junit.Before;
 import org.junit.Test;
 
