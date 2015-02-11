@@ -22,30 +22,36 @@ public class LockManagerTests {
 	}
 	
 	@Test
-	public void testGetLockForKey() {
-		assertNotNull(lockManager.getLockForKey(1));
+	public void testReadLockMultiple() {
+		lockManager.lockKey(1, LockType.READ);
+		lockManager.lockKey(1, LockType.READ);
+		lockManager.lockKey(1, LockType.READ);
+		assertTrue(true);
 	}
 	
 	@Test
-	public void testGetSameLockForSameKey() {
-		ReadWriteLock lock = lockManager.getLockForKey(1);
-		ReadWriteLock lock2 = lockManager.getLockForKey(1);
-		assertEquals(lock, lock2);
+	public void testReadThenWrite() {
+		lockManager.lockKey(2, LockType.READ);
+		lockManager.lockKey(2, LockType.READ);
+		lockManager.unlockKey(2, LockType.READ);
+		lockManager.unlockKey(2, LockType.READ);
+		lockManager.lockKey(2, LockType.WRITE);
+		assertTrue(true);
 	}
 	
 	@Test
-	public void testGetDifferentLockForDifferentKey() {
-		ReadWriteLock lock = lockManager.getLockForKey(1);
-		ReadWriteLock lock2 = lockManager.getLockForKey(2);
-		assertNotEquals(lock, lock2);
+	public void testWriteLockMultiple() {
+		lockManager.lockKey(3, LockType.WRITE);
+		lockManager.unlockKey(3, LockType.WRITE);
+		lockManager.lockKey(3, LockType.WRITE);
+		assertTrue(true);
 	}
 	
 	@Test
-	public void testGetLockAfterFinishedGetsDifferentLock() {
-		ReadWriteLock lock = lockManager.getLockForKey(1);
-		lockManager.finishedWithLockForKey(1);
-		ReadWriteLock lock2 = lockManager.getLockForKey(1);
-		assertNotEquals(lock, lock2);
+	public void testWriteDifferentLocks() {
+		lockManager.lockKey(4, LockType.WRITE);
+		lockManager.lockKey(5, LockType.WRITE);
+		assertTrue(true);
 	}
 
 }

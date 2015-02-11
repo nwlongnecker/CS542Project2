@@ -24,7 +24,7 @@ public class ValueStoreImplTests {
 		}
 		assertFalse(directory.exists());
 		// Create a new database location
-		ValueStoreImpl vs = new ValueStoreImpl(dbLoc);
+		ValueStoreImpl vs = ValueStoreImpl.getInstance(dbLoc);
 		assertEquals(dbLoc + "/", vs.databaseFolder);
 		assertTrue(directory.exists());
 		// Delete the directory to clean up after the tests
@@ -39,7 +39,7 @@ public class ValueStoreImplTests {
 			assertTrue(directory.delete());
 		}
 		assertFalse(directory.exists());
-		ValueStoreImpl vs = new ValueStoreImpl();
+		ValueStoreImpl vs = ValueStoreImpl.getInstance();
 		assertEquals("database/", vs.databaseFolder);
 		assertTrue(directory.exists());
 		// Delete the directory to clean up after the tests
@@ -57,7 +57,7 @@ public class ValueStoreImplTests {
 			assertTrue(directory.exists());
 		}
 		// Create a new database location
-		ValueStoreImpl vs = new ValueStoreImpl(dbLoc);
+		ValueStoreImpl vs = ValueStoreImpl.getInstance(dbLoc);
 		assertEquals(dbLoc + "/", vs.databaseFolder);
 		assertTrue(directory.exists());
 		// Delete the directory to clean up after the tests
@@ -78,7 +78,7 @@ public class ValueStoreImplTests {
 		new File(dbLoc + "/" + 3).createNewFile();
 		// Create a new database location
 		try {
-			new ValueStoreImpl(dbLoc);
+			ValueStoreImpl.getInstance(dbLoc);
 			fail();
 		} catch (ValueStoreException e) {
 			ValueStoreImpl.deleteFolder(directory);
@@ -93,7 +93,7 @@ public class ValueStoreImplTests {
 		if(directory.exists()) {
 			directory.delete();
 		}
-		ValueStoreImpl vs = new ValueStoreImpl(dbLoc);
+		ValueStoreImpl vs = ValueStoreImpl.getInstance(dbLoc);
 		assertEquals(dbLoc + "/", vs.databaseFolder);
 		assertTrue(directory.exists());
 		// Delete the directory to clean up after the tests
@@ -110,7 +110,7 @@ public class ValueStoreImplTests {
 			assertTrue(directory.delete());
 		}
 		assertFalse(directory.exists());
-		ValueStoreImpl vs = new ValueStoreImpl(dbLoc);
+		ValueStoreImpl vs = ValueStoreImpl.getInstance(dbLoc);
 		assertEquals(dbLoc + "/", vs.databaseFolder);
 		assertTrue(directory.exists());
 		new File(dbLoc + "/" + 1).createNewFile();
@@ -129,7 +129,7 @@ public class ValueStoreImplTests {
 			assertTrue(directory.delete());
 		}
 		assertFalse(directory.exists());
-		ValueStoreImpl vs = new ValueStoreImpl(dbLoc);
+		ValueStoreImpl vs = ValueStoreImpl.getInstance(dbLoc);
 		assertEquals(dbLoc + "/", vs.databaseFolder);
 		assertTrue(directory.exists());
 		new File(dbLoc + "/" + 1).mkdir();
@@ -143,7 +143,7 @@ public class ValueStoreImplTests {
 	public void testPutNewFile() throws FileNotFoundException, IOException, ValueStoreException {
 		// Test that put creates a new file with specific contents
 		String dirName = "test1";
-		ValueStoreImpl vs = new ValueStoreImpl(dirName);
+		ValueStoreImpl vs = ValueStoreImpl.getInstance(dirName);
 		
 		int key = 1;
 		File newFile = new File(dirName + "/" + key);
@@ -181,7 +181,7 @@ public class ValueStoreImplTests {
 	public void testPutExistingFile() throws FileNotFoundException, IOException, ValueStoreException {
 		// Test that put replaces an existing file
 		String dirName = "test2";
-		ValueStoreImpl vs = new ValueStoreImpl(dirName);
+		ValueStoreImpl vs = ValueStoreImpl.getInstance(dirName);
 		
 		int key = 1;
 		File newFile = new File(dirName + "/" + key);
@@ -220,7 +220,7 @@ public class ValueStoreImplTests {
 	public void testPutNonemptyExistingFile() throws FileNotFoundException, IOException, ValueStoreException {
 		// Test that put completely replaces the contents of a file
 		String dirName = "test3";
-		ValueStoreImpl vs = new ValueStoreImpl(dirName);
+		ValueStoreImpl vs = ValueStoreImpl.getInstance(dirName);
 		
 		int key = 1;
 		File newFile = new File(dirName + "/" + key);
@@ -275,7 +275,7 @@ public class ValueStoreImplTests {
 	public void testRemove() throws IOException, ValueStoreException {
 		// Test that remove deletes an existing file
 		String dirName = "test4";
-		ValueStoreImpl vs = new ValueStoreImpl(dirName);
+		ValueStoreImpl vs = ValueStoreImpl.getInstance(dirName);
 		
 		int key = 1;
 		File newFile = new File(dirName + "/" + key);
@@ -296,7 +296,7 @@ public class ValueStoreImplTests {
 	public void testRemoveInvalidFile() throws ValueStoreException {
 		// Test that remove deletes an existing file
 		String dirName = "test5";
-		ValueStoreImpl vs = new ValueStoreImpl(dirName);
+		ValueStoreImpl vs = ValueStoreImpl.getInstance(dirName);
 		
 		int key = 4;
 		File newFile = new File(dirName + "/" + key);
@@ -317,7 +317,7 @@ public class ValueStoreImplTests {
 	public void testGetFile() throws ValueStoreException {
 		// Test that get gets the contents of a file
 		String dirName = "test6";
-		ValueStoreImpl vs = new ValueStoreImpl(dirName);
+		ValueStoreImpl vs = ValueStoreImpl.getInstance(dirName);
 		
 		int key = 2;
 		byte[] inData = "Contents".getBytes();
@@ -334,7 +334,7 @@ public class ValueStoreImplTests {
 	public void testGetFileDoesntExist() throws ValueStoreException {
 		// Test that get returns null if the file doesn't exist
 		String dirName = "test7";
-		ValueStoreImpl vs = new ValueStoreImpl(dirName);
+		ValueStoreImpl vs = ValueStoreImpl.getInstance(dirName);
 		
 		int key = 4;
 		File newFile = new File(dirName + "/" + key);

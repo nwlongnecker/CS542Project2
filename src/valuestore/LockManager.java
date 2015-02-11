@@ -5,7 +5,7 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
- * Singleton class that manages the locks for a value store.
+ * Class that manages the locks for a value store.
  */
 public class LockManager
 {
@@ -24,12 +24,14 @@ public class LockManager
 	}
 	
 	/**
-	 * Gets the read/write lock for the given key.
-	 * @param key Integer to identify the lock needed.
-	 * @return The lock for the integer given.
+	 * Grab the lock that will be used for reading/writing at given key.
+	 * @param key The key representing the data to grab/create the lock for.
+	 * @param lockType Whether we are locking for reading or writing.
 	 */
-	public ReadWriteLock getLockForKey(int key)
+	public void lockKey(int key, LockType lockType)
 	{
+		ReadWriteLock lock;
+		
 		// Make sure no one else is currently accessing the map.
 		synchronized(lockForMap)
 		{
@@ -39,23 +41,64 @@ public class LockManager
 				// Create a lock for this key.
 				locks.put(key, new ReentrantReadWriteLock());
 			}
-			// Return the appropriate lock.
-			return locks.get(key);
+			
+			// Grab the appropriate lock.
+			lock = locks.get(key);
+		}
+		
+		// Switch on the type of lock we want.
+		switch (lockType)
+		{
+			// Grab the read lock.
+			case READ:
+				lock.readLock().lock();
+				break;
+			
+			// Grab the write lock.
+			case WRITE:
+				lock.writeLock().lock();
+				break;
 		}
 	}
 	
 	/**
-	 * Deletes the lock for a given key so that we don't accumulate
-	 * as many locks as there are keys in the value store.
-	 * @param key Integer to identify the lock to delete.
+	 * Release the lock that was used for reading/writing at given key.
+	 * @param key The key representing the data to grab the lock for.
+	 * @param lockType Whether we are unlocking after reading or writing.
 	 */
-	public void finishedWithLockForKey(int key)
+	public void unlockKey(int key, LockType lockType)
 	{
+		ReadWriteLock lock;
+		
 		// Make sure no one else is currently accessing the map.
 		synchronized(lockForMap)
 		{
-			// Remove the lock for this key.
-			locks.remove(key);
+			// Grab the appropriate lock.
+			lock = locks.get(key);
+		}
+		
+		// Switch on the type of lock we want.
+		switch (lockType)
+		{
+			// Release the read lock.
+			case READ:
+				lock.readLock().unlock();
+				break;
+			
+			// Release the write lock.
+			case WRITE:
+				lock.writeLock().unlock();
+				break;
+		}
+		
+		// Make sure no one else is currently accessing the map.
+		synchronized(lockForMap)
+		{
+			// If nobody else is using the lock, remove it to minimize memory usage.
+			if (lock.writeLock().tryLock())
+			{
+				locks.remove(key);
+			}
 		}
 	}
 }
