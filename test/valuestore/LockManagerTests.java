@@ -5,6 +5,9 @@ import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
+import valuestore.locks.LockManager;
+import valuestore.locks.LockType;
+
 public class LockManagerTests {
 	
 	LockManager lockManager;

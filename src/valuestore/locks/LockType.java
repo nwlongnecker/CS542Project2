@@ -1,4 +1,4 @@
-package valuestore;
+package valuestore.locks;
 
 /**
  * Enum to represent each of the read/write lock types.

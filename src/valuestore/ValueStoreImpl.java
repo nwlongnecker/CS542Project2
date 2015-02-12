@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.UUID;
 
+import valuestore.locks.LockManager;
+import valuestore.locks.LockType;
 import valuestore.logger.DeleteTransaction;
 import valuestore.logger.Logger;
 import valuestore.logger.WriteTransaction;
