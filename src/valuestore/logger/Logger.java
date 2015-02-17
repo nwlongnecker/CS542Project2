@@ -11,44 +11,37 @@ import java.io.ObjectOutputStream;
 import java.util.HashMap;
 import java.util.UUID;
 
-import valuestore.Recovery;
-import valuestore.ValueStoreException;
+import valuestore.ValueStoreImpl;
 
 /**
- * Singleton class for logging changes to the database. Used to restore to a consistent state on startup.
+ * Class for logging changes to the database. Used to restore to a consistent state on startup.
  * @author Nathan
  */
 public class Logger {
 	
 	static final String LOG_FILE = "dblog";
 	
-	// Singleton pattern
-	private static Logger logger;
-	
-	/**
-	 * Gets the single instance of the logger class
-	 * @return A logger
-	 * @throws ValueStoreException If recovery from a file fails
-	 */
-	public static Logger getLogger() {
-		if(logger == null) {
-			logger = new Logger(LOG_FILE);
-		}
-		return logger;
-	}
-	
 	HashMap<UUID, Transaction> log;
 	final String logFile;
 	
-	Logger(String logFile) {
-		this.logFile = logFile;
+	/**
+	 * Constructor for a value store logger.
+	 * @param databaseFolder The folder for the value store.
+	 */
+	public Logger(ValueStoreImpl valueStore) {
+		this.logFile = valueStore.getDatabaseFolder() + LOG_FILE;
+		File currentLog = new File(logFile);
+		File tempLog = new File(logFile+".tmp");
+		if (!currentLog.exists() && tempLog.exists()) {
+			tempLog.renameTo(currentLog);
+		}
 		readLog();
 		if(log != null) {
 			// Check for unfinished transactions and recover
 			if(log.size() != 0) {
 				// If there are transactions in the log file,
 				// we need to complete them to be sure we're in a consistent state
-				if(Recovery.process(log.values())) {
+				if(valueStore.recover(log.values())) {
 					log = new HashMap<UUID, Transaction>();
 				} else {
 					System.err.println("Recovery failed! Abort!");
@@ -87,7 +80,7 @@ public class Logger {
 	 * Writes and flushes the log HashMap to the log file
 	 */
 	void writeLog() {
-		try (ObjectOutputStream writer = new ObjectOutputStream(new FileOutputStream(logFile))) {
+		try (ObjectOutputStream writer = new ObjectOutputStream(new FileOutputStream(logFile+".tmp"))) {
 			writer.writeObject(log);
 			writer.flush();
 		} catch (FileNotFoundException e) {
@@ -95,6 +88,12 @@ public class Logger {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		
+		File oldLog = new File(logFile);
+		oldLog.delete();
+		
+		File newLog = new File(logFile+".tmp");
+		newLog.renameTo(oldLog);
 		
 		// Purely for convenience, would be removed in production code
 		prettyPrintLog();

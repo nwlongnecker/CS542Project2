@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.UUID;
 
@@ -11,6 +12,7 @@ import valuestore.locks.LockManager;
 import valuestore.locks.LockType;
 import valuestore.logger.DeleteTransaction;
 import valuestore.logger.Logger;
+import valuestore.logger.Transaction;
 import valuestore.logger.WriteTransaction;
 
 /**
@@ -32,6 +34,12 @@ public class ValueStoreImpl implements IValueStore
 	// Lock manager for the value store object.
 	final LockManager lockManager;
 	
+	// Logger for the value store object.
+	final Logger logger;
+	
+	// Lock for the logger.
+	final Object loggerLock;
+	
 
 	/**
 	 * Constructor that allows the database folder to be specified.
@@ -42,6 +50,8 @@ public class ValueStoreImpl implements IValueStore
 	{	
 		databaseFolder = folder + "/";
 		lockManager = new LockManager();
+		logger = new Logger(this);
+		loggerLock = new Object();
 		
 		// Make the database directory.
 		File databaseDir = new File(folder);
@@ -98,32 +108,23 @@ public class ValueStoreImpl implements IValueStore
 	@Override
 	public void put(int key, byte[] data)
 	{
-		// Log that we're going to do a write.
-		UUID opid = Logger.getLogger().logTransaction(new WriteTransaction(databaseFolder + key, data));
-		
-		// Grab the write lock for the key.
-		lockManager.lockKey(key, LockType.WRITE);
-		
-		// Delete the file if it already exists.
-		File dataFile = new File(databaseFolder + key);
-		dataFile.delete();
-		
-		// Create a new file to store the data.
-		try (FileOutputStream fileWriter = new FileOutputStream(databaseFolder + key))
+		UUID opid;
+		// Make sure no two threads are logging at the same time.
+		synchronized(loggerLock)
 		{
-			// Write the data to the new empty file.
-			fileWriter.write(data);
-		}
-		catch (IOException e)
-		{
-			e.printStackTrace();
+			// Log that we're going to do a write.
+			opid = logger.logTransaction(new WriteTransaction(databaseFolder + key, data));
 		}
 		
-		// Release the write lock for the key.
-		lockManager.unlockKey(key, LockType.WRITE);
+		// Write the new data to the key.
+		writeKey(key, data);
 		
-		// Log that we've finished the write
-		Logger.getLogger().endTransaction(opid);
+		// Make sure no two threads are logging at the same time.
+		synchronized(loggerLock)
+		{
+			// Log that we've finished the write
+			logger.endTransaction(opid);
+		}
 	}
 
 	@Override
@@ -168,21 +169,69 @@ public class ValueStoreImpl implements IValueStore
 	@Override
 	public void remove(int key)
 	{
-		// Log that we're going to do a delete.
-		UUID opid = Logger.getLogger().logTransaction(new DeleteTransaction(databaseFolder + key));
+		UUID opid;
+		// Make sure no two threads are logging at the same time.
+		synchronized(loggerLock)
+		{
+			// Log that we're going to do a delete.
+			opid = logger.logTransaction(new DeleteTransaction(databaseFolder + key));
+		}
 		
+		// Delete the key from our value store.
+		deleteKey(key);
+
+		// Make sure no two threads are logging at the same time.
+		synchronized(loggerLock)
+		{
+			// Log that we've finished the delete
+			logger.endTransaction(opid);
+		}
+	}
+	
+	/**
+	 * Delete the old key (file) if it exists and create a new one with the data.
+	 * @param key The name for the file (an integer).
+	 * @param data The bytes to write to the file.
+	 */
+	private void writeKey(int key, byte[] data)
+	{
 		// Grab the write lock for the key.
 		lockManager.lockKey(key, LockType.WRITE);
 		
-		// Delete the file for this key if it exists.
+		// Delete the file if it already exists.
 		File dataFile = new File(databaseFolder + key);
 		dataFile.delete();
 		
+		// Create a new file to store the data.
+		try (FileOutputStream fileWriter = new FileOutputStream(databaseFolder + key))
+		{
+			// Write the data to the new empty file.
+			fileWriter.write(data);
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
+		
 		// Release the write lock for the key.
 		lockManager.unlockKey(key, LockType.WRITE);
-		
-		// Log that we've finished the delete
-		Logger.getLogger().endTransaction(opid);
+	}
+	
+	/**
+	 * Delete the key (file) if it exists.
+	 * @param key The name for the file (an integer).
+	 */
+	private void deleteKey(int key)
+	{
+		// Grab the write lock for the key.
+		lockManager.lockKey(key, LockType.WRITE);
+				
+		// Delete the file for this key if it exists.
+		File dataFile = new File(databaseFolder + key);
+		dataFile.delete();
+				
+		// Release the write lock for the key.
+		lockManager.unlockKey(key, LockType.WRITE);
 	}
 	
 	/**
@@ -217,5 +266,39 @@ public class ValueStoreImpl implements IValueStore
 	        }
 	    }
 	    folder.delete();
+	}
+	
+	/**
+	 * Getter for the database folder.
+	 * @return String for the database folder.
+	 */
+	public String getDatabaseFolder()
+	{
+		return databaseFolder;
+	}
+	
+	/**
+	 * In case we crashed while transactions were occurring, recover by executing them.
+	 * @param unfinishedTransactions Transactions to complete.
+	 * @return Success or failure of the recovery.
+	 */
+	public boolean recover(Collection<Transaction> unfinishedTransactions)
+	{
+		// Iterate through the unfinished transactions.
+		for (Transaction transaction : unfinishedTransactions)
+		{	
+			if (transaction instanceof WriteTransaction)
+			{
+				// If it was a write transaction, write the data to that key.
+				writeKey(Integer.parseInt(transaction.getFilename()), ((WriteTransaction) transaction).getContents());
+			}
+			else if (transaction instanceof DeleteTransaction)
+			{
+				// If it was a delete transaction, delete the key.
+				deleteKey(Integer.parseInt(transaction.getFilename()));
+			}
+		}
+		// For posterity.
+		return true;
 	}
 }

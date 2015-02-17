@@ -1,6 +1,7 @@
 package valuestore.logger;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -15,16 +16,18 @@ import org.junit.Before;
 import org.junit.Test;
 
 import valuestore.ValueStoreException;
-import valuestore.logger.Logger;
+import valuestore.ValueStoreImpl;
 
 public class LoggerTest {
 	
 	Logger logger;
 	final String logFile = "testLogFile";
+	ValueStoreImpl valueStore;
 	
 	@Before
-	public void setup() {
-		logger = new Logger(logFile);
+	public void setup() throws ValueStoreException {
+		valueStore = ValueStoreImpl.getInstance();
+		logger = new Logger(valueStore);
 	}
 	
 	@After
@@ -35,8 +38,8 @@ public class LoggerTest {
 
 	@Test
 	public void testLoggerIsSingleton() {
-		Logger logger = Logger.getLogger();
-		Logger logger2 = Logger.getLogger();
+		Logger logger = new Logger(valueStore);
+		Logger logger2 = new Logger(valueStore);
 		assertEquals(logger, logger2);
 	}
 
@@ -64,7 +67,7 @@ public class LoggerTest {
 		logger.endTransaction(t.getTransactionID());
 		assertNull(logger.log.get(t.getTransactionID()));
 		
-		logger = new Logger(logFile);
+		logger = new Logger(valueStore);
 		assertEquals(0, logger.log.size());
 	}
 	
@@ -81,18 +84,5 @@ public class LoggerTest {
 		}
 		assertEquals(t.getTransactionID(), storedValues.get(t.getTransactionID()).getTransactionID());
 		assertEquals(t.getFilename(), storedValues.get(t.getTransactionID()).getFilename());
-	}
-	
-	@Test
-	public void testWriteLogPrettyPrint() {
-		logger = new Logger("PrettyPrintLog");
-		Transaction t = new WriteTransaction("Filename", "Hello".getBytes());
-		logger.logTransaction(t);
-		t = new DeleteTransaction("name");
-		logger.logTransaction(t);
-		t = new WriteTransaction("OtherFilename", "LotsOfContentsOftheFilehere".getBytes());
-		logger.logTransaction(t);
-		new File("PrettyPrintLog").delete();
-		new File("PrettyPrintLog.txt").delete();
 	}
 }

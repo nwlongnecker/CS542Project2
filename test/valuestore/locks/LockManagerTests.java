@@ -1,4 +1,4 @@
-package valuestore;
+package valuestore.locks;
 
 import static org.junit.Assert.*;
 
