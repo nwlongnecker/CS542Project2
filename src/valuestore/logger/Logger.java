@@ -83,11 +83,9 @@ public class Logger {
 		try (ObjectOutputStream writer = new ObjectOutputStream(new FileOutputStream(logFile+".tmp"))) {
 			writer.writeObject(log);
 			writer.flush();
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
 		}
+		catch (FileNotFoundException e) {}
+		catch (IOException e) {}
 		
 		File oldLog = new File(logFile);
 		oldLog.delete();
@@ -107,11 +105,9 @@ public class Logger {
 		if(new File(logFile).exists()) {
 			try (ObjectInputStream reader = new ObjectInputStream(new FileInputStream(logFile))) {
 				log = (HashMap<UUID, Transaction>) reader.readObject();
-			} catch (ClassNotFoundException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
-				e.printStackTrace();
 			}
+			catch (ClassNotFoundException e) {}
+			catch (IOException e) {}
 		}
 	}
 	
@@ -136,8 +132,6 @@ public class Logger {
 				writer.write("\n");
 			}
 			writer.flush();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		} catch (IOException e) {}
 	}
 }

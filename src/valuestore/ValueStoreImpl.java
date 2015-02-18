@@ -113,7 +113,7 @@ public class ValueStoreImpl implements IValueStore
 		synchronized(loggerLock)
 		{
 			// Log that we're going to do a write.
-			opid = logger.logTransaction(new WriteTransaction(databaseFolder + key, data));
+			opid = logger.logTransaction(new WriteTransaction("" + key, data));
 		}
 		
 		// Write the new data to the key.
@@ -136,27 +136,24 @@ public class ValueStoreImpl implements IValueStore
 		// Check that a file exists for the key.
 		File dataFile = new File(databaseFolder + key);
 		if (dataFile.exists())
-		{
-			// Create a byte array to store the data from the file.
-			int dataLength = (int) dataFile.length();
-			byte[] data = new byte[dataLength];
-			
+		{	
 			// Get a reader for the file containing the data.
 			try (FileInputStream fileReader = new FileInputStream(databaseFolder + key))
 			{
+				// Create a byte array to store the data from the file.
+				int dataLength = (int) fileReader.available();
+				byte[] data = new byte[dataLength];
+				
 				// Read in the bytes of the file.
 				fileReader.read(data);
+				
+				// Release the read lock for the key.
+				lockManager.unlockKey(key, LockType.READ);
+				
+				// Return the data from the file.
+				return data;
 			}
-			catch (IOException e)
-			{
-				e.printStackTrace();
-			}
-			
-			// Release the read lock for the key.
-			lockManager.unlockKey(key, LockType.READ);
-			
-			// Return the data from the file.
-			return data;
+			catch (IOException e) {}
 		}
 		
 		// Release the read lock for the key.
@@ -174,7 +171,7 @@ public class ValueStoreImpl implements IValueStore
 		synchronized(loggerLock)
 		{
 			// Log that we're going to do a delete.
-			opid = logger.logTransaction(new DeleteTransaction(databaseFolder + key));
+			opid = logger.logTransaction(new DeleteTransaction("" + key));
 		}
 		
 		// Delete the key from our value store.
@@ -207,13 +204,8 @@ public class ValueStoreImpl implements IValueStore
 		{
 			// Write the data to the new empty file.
 			fileWriter.write(data);
-			fileWriter.flush();
-			fileWriter.close();
 		}
-		catch (IOException e)
-		{
-			e.printStackTrace();
-		}
+		catch (IOException e) {}
 		
 		// Release the write lock for the key.
 		lockManager.unlockKey(key, LockType.WRITE);
