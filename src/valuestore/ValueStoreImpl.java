@@ -135,26 +135,38 @@ public class ValueStoreImpl implements IValueStore
 		
 		// Check that a file exists for the key.
 		File dataFile = new File(databaseFolder + key);
-		if (dataFile.exists())
-		{	
-			// Get a reader for the file containing the data.
-			try (FileInputStream fileReader = new FileInputStream(databaseFolder + key))
+		
+		// Get a reader for the file containing the data.
+		try (FileInputStream fileReader = new FileInputStream(databaseFolder + key))
+		{
+			// Create a byte array to store the data from the file.
+			int dataLength = (int) dataFile.length();
+			
+			// Attempt to read until we have all the data.
+			byte[] data = null;
+			int bytesRead = 0;
+			while (bytesRead != dataLength)
 			{
-				// Create a byte array to store the data from the file.
-				int dataLength = (int) fileReader.available();
-				byte[] data = new byte[dataLength];
-				
-				// Read in the bytes of the file.
-				fileReader.read(data);
-				
-				// Release the read lock for the key.
-				lockManager.unlockKey(key, LockType.READ);
-				
-				// Return the data from the file.
-				return data;
+				// Check that a file exists for the key.
+				if (dataFile.exists())
+				{
+					data = new byte[dataLength];
+					bytesRead = fileReader.read(data);
+				}
+				else // The file does not exist, return null.
+				{
+					data = null;
+					break;
+				}
 			}
-			catch (IOException e) {}
+			
+			// Release the read lock for the key.
+			lockManager.unlockKey(key, LockType.READ);
+			
+			// Return the data from the file.
+			return data;
 		}
+		catch (IOException e) {}
 		
 		// Release the read lock for the key.
 		lockManager.unlockKey(key, LockType.READ);

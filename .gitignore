@@ -2,3 +2,4 @@ bin/
 dblog
 dblog.txt
 stressTest/
+sizeTest/
