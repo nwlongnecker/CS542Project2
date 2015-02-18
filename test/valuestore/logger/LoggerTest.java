@@ -1,7 +1,6 @@
 package valuestore.logger;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -21,38 +20,30 @@ import valuestore.ValueStoreImpl;
 public class LoggerTest {
 	
 	Logger logger;
-	final String logFile = "testLogFile";
+	final String testLoggerDB = "testLoggerDB";
 	ValueStoreImpl valueStore;
 	
 	@Before
 	public void setup() throws ValueStoreException {
-		valueStore = ValueStoreImpl.getInstance();
+		valueStore = ValueStoreImpl.getInstance(testLoggerDB);
 		logger = new Logger(valueStore);
 	}
 	
 	@After
 	public void tearDown() {
-		new File(logFile).delete();
-		new File(logFile + ".txt").delete();
-	}
-
-	@Test
-	public void testLoggerIsSingleton() {
-		Logger logger = new Logger(valueStore);
-		Logger logger2 = new Logger(valueStore);
-		assertEquals(logger, logger2);
+		valueStore.cleanUp();
 	}
 
 	@Test
 	public void testLogTransaction() {
-		Transaction t = new WriteTransaction("Filename", "Hello".getBytes());
+		Transaction t = new WriteTransaction("2", "Hello".getBytes());
 		logger.logTransaction(t);
 		assertEquals(t, logger.log.get(t.getTransactionID()));
 	}
 	
 	@Test
 	public void testRemoveTransaction() {
-		Transaction t = new WriteTransaction("Filename", "Hello".getBytes());
+		Transaction t = new WriteTransaction("4", "Hello".getBytes());
 		logger.logTransaction(t);
 		assertEquals(t, logger.log.get(t.getTransactionID()));
 		logger.endTransaction(t.getTransactionID());
@@ -61,7 +52,7 @@ public class LoggerTest {
 	
 	@Test
 	public void testWriteReadEmptyLog() {
-		Transaction t = new WriteTransaction("Filename", "Hello".getBytes());
+		Transaction t = new WriteTransaction("1", "Hello".getBytes());
 		logger.logTransaction(t);
 		assertEquals(t, logger.log.get(t.getTransactionID()));
 		logger.endTransaction(t.getTransactionID());
@@ -74,12 +65,16 @@ public class LoggerTest {
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testWriteLog() throws FileNotFoundException, IOException, ClassNotFoundException {
-		Transaction t = new WriteTransaction("Filename2", "Hello".getBytes());
+		assertEquals(testLoggerDB + "/", valueStore.getDatabaseFolder());
+		File f = new File("testLoggerDB/");
+		f.mkdir();
+		assertTrue(f.exists());
+		Transaction t = new WriteTransaction("6", "Hello".getBytes());
 		logger.logTransaction(t);
 		assertEquals(t, logger.log.get(t.getTransactionID()));
 		
 		HashMap<UUID, Transaction> storedValues;
-		try (ObjectInputStream reader = new ObjectInputStream(new FileInputStream(logFile))) {
+		try (ObjectInputStream reader = new ObjectInputStream(new FileInputStream(testLoggerDB + "/" + "dblog"))) {
 			storedValues = (HashMap<UUID, Transaction>) reader.readObject();
 		}
 		assertEquals(t.getTransactionID(), storedValues.get(t.getTransactionID()).getTransactionID());

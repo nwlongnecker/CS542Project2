@@ -54,7 +54,7 @@ public class ValueStoreImpl implements IValueStore
 		loggerLock = new Object();
 		
 		// Make the database directory.
-		File databaseDir = new File(folder);
+		File databaseDir = new File(databaseFolder);
 		databaseDir.mkdir();
 		
 		File[] files = databaseDir.listFiles();
@@ -237,7 +237,7 @@ public class ValueStoreImpl implements IValueStore
 	/**
 	 * Deletes all traces of the database off the disk. Mostly used for cleaning up after tests.
 	 */
-	void cleanUp()
+	public void cleanUp()
 	{
 		// Delete the database directory.
 		File databaseDir = new File(databaseFolder);
