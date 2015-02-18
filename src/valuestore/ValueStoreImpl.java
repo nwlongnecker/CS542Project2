@@ -207,6 +207,8 @@ public class ValueStoreImpl implements IValueStore
 		{
 			// Write the data to the new empty file.
 			fileWriter.write(data);
+			fileWriter.flush();
+			fileWriter.close();
 		}
 		catch (IOException e)
 		{
