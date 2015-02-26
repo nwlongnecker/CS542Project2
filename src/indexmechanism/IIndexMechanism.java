@@ -16,7 +16,7 @@ public interface IIndexMechanism
 	 * Get data from the index mechanism.
 	 * @param dataValue The data to search the index mechanism for.
 	 */
-	void get(String dataValue);
+	String get(String dataValue);
 	
 	/**
 	 * Remove the data in the index mechanism for the given key.
