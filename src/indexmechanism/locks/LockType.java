@@ -1,4 +1,4 @@
-package valuestore.locks;
+package indexmechanism.locks;
 
 /**
  * Enum to represent each of the read/write lock types.

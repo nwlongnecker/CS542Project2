@@ -1,6 +1,11 @@
-package valuestore.logger;
+package indexmechanism.logger;
 
 import static org.junit.Assert.*;
+import indexmechanism.ValueStoreException;
+import indexmechanism.ValueStoreImpl;
+import indexmechanism.logger.Logger;
+import indexmechanism.logger.Transaction;
+import indexmechanism.logger.WriteTransaction;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -13,9 +18,6 @@ import java.util.UUID;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-
-import valuestore.ValueStoreException;
-import valuestore.ValueStoreImpl;
 
 public class LoggerTest {
 	

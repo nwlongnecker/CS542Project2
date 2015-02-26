@@ -1,8 +1,8 @@
-package main;
+package indexmechanism.main;
 
-import valuestore.IValueStore;
-import valuestore.ValueStoreException;
-import valuestore.ValueStoreImpl;
+import indexmechanism.IValueStore;
+import indexmechanism.ValueStoreException;
+import indexmechanism.ValueStoreImpl;
 
 /**
  * Sample main demonstrating how our ValueStore could be used in a program.

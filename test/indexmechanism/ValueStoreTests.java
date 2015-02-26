@@ -1,4 +1,8 @@
-package valuestore;
+package indexmechanism;
+
+import indexmechanism.IValueStore;
+import indexmechanism.ValueStoreException;
+import indexmechanism.ValueStoreImpl;
 
 import java.util.ArrayList;
 import java.util.Random;

@@ -1,4 +1,4 @@
-package valuestore.logger;
+package indexmechanism.logger;
 
 import java.io.Serializable;
 import java.util.UUID;

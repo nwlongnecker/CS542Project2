@@ -1,4 +1,4 @@
-package valuestore;
+package indexmechanism;
 
 /**
  * Represents a value store that stores byte data at integer keys.

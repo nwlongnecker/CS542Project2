@@ -1,4 +1,4 @@
-package valuestore;
+package indexmechanism;
 
 /**
  * Exception to throw for an error in the value store.

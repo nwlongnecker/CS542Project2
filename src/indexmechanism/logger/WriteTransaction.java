@@ -1,4 +1,4 @@
-package valuestore.logger;
+package indexmechanism.logger;
 
 /**
  * Transaction object representing a write transaction

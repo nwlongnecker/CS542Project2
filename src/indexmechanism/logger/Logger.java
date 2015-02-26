@@ -1,4 +1,6 @@
-package valuestore.logger;
+package indexmechanism.logger;
+
+import indexmechanism.ValueStoreImpl;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -10,8 +12,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.HashMap;
 import java.util.UUID;
-
-import valuestore.ValueStoreImpl;
 
 /**
  * Class for logging changes to the database. Used to restore to a consistent state on startup.

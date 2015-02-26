@@ -1,4 +1,11 @@
-package valuestore;
+package indexmechanism;
+
+import indexmechanism.locks.LockManager;
+import indexmechanism.locks.LockType;
+import indexmechanism.logger.DeleteTransaction;
+import indexmechanism.logger.Logger;
+import indexmechanism.logger.Transaction;
+import indexmechanism.logger.WriteTransaction;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -7,13 +14,6 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.UUID;
-
-import valuestore.locks.LockManager;
-import valuestore.locks.LockType;
-import valuestore.logger.DeleteTransaction;
-import valuestore.logger.Logger;
-import valuestore.logger.Transaction;
-import valuestore.logger.WriteTransaction;
 
 /**
  * Represents an implementation of a data store that can keep

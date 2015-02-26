@@ -1,6 +1,9 @@
-package valuestore.logger;
+package indexmechanism.logger;
 
 import static org.junit.Assert.*;
+import indexmechanism.logger.DeleteTransaction;
+import indexmechanism.logger.Transaction;
+import indexmechanism.logger.WriteTransaction;
 
 import org.junit.Test;
 

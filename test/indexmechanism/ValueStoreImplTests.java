@@ -1,4 +1,7 @@
-package valuestore;
+package indexmechanism;
+
+import indexmechanism.ValueStoreException;
+import indexmechanism.ValueStoreImpl;
 
 import java.io.File;
 import java.io.FileInputStream;

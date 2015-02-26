@@ -1,4 +1,4 @@
-package valuestore.locks;
+package indexmechanism.locks;
 
 import java.util.HashMap;
 import java.util.concurrent.locks.ReadWriteLock;
