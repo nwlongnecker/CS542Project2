@@ -1,5 +1,9 @@
 package indexmechanism;
 
+/**
+ * Data structure for storing key value pairs
+ * @author Nathan
+ */
 public class Index {
 	
 	private String key;
