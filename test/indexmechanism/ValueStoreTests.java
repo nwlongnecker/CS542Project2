@@ -1,7 +1,7 @@
 package indexmechanism;
 
 import indexmechanism.IValueStore;
-import indexmechanism.ValueStoreException;
+import indexmechanism.IndexMechanismException;
 import indexmechanism.IndexMechanismImpl;
 
 import java.util.ArrayList;
@@ -53,7 +53,7 @@ public class ValueStoreTests {
 								}
 							}
 						}
-					} catch (ValueStoreException e) {
+					} catch (IndexMechanismException e) {
 						e.printStackTrace();
 					}
 				}
@@ -78,7 +78,7 @@ public class ValueStoreTests {
 			byte[] largeData = new byte[500000000];
 			vs.put(1, largeData);
 			assertTrue(vs.get(1).length == 500000000);
-		} catch (ValueStoreException e) {
+		} catch (IndexMechanismException e) {
 			e.printStackTrace();
 		}
 	}

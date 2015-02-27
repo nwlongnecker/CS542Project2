@@ -44,9 +44,9 @@ public class IndexMechanismImpl implements IIndexMechanism
 	/**
 	 * Constructor that allows the database folder to be specified.
 	 * @param folder Path to the folder to store database files.
-	 * @throws ValueStoreException If the specified directory is invalid.
+	 * @throws IndexMechanismException If the specified directory is invalid.
 	 */
-	private IndexMechanismImpl(String folder) throws ValueStoreException
+	private IndexMechanismImpl(String folder) throws IndexMechanismException
 	{	
 		databaseFolder = folder + "/";
 		lockManager = new LockManager();
@@ -64,7 +64,7 @@ public class IndexMechanismImpl implements IIndexMechanism
 	        {
 	            if (f.isDirectory())
 	            {
-	                throw new ValueStoreException("Invalid database directory. Database directory cannot contain directories.");
+	                throw new IndexMechanismException("Invalid database directory. Database directory cannot contain directories.");
 	            }
 	        }
 	    }
@@ -73,9 +73,9 @@ public class IndexMechanismImpl implements IIndexMechanism
 	/**
 	 * Calls the getInstance method using the default database folder location.
 	 * @return The value store for the default folder.
-	 * @throws ValueStoreException If the specified directory is invalid.
+	 * @throws IndexMechanismException If the specified directory is invalid.
 	 */
-	public static IndexMechanismImpl getInstance() throws ValueStoreException
+	public static IndexMechanismImpl getInstance() throws IndexMechanismException
 	{
 		return getInstance(DEFAULT_LOCATION);
 	}
@@ -84,9 +84,9 @@ public class IndexMechanismImpl implements IIndexMechanism
 	 * Gets the instance of ValueStoreImpl for the given folder.
 	 * @param folder The folder location to use for the value store.
 	 * @return The value store for the given folder.
-	 * @throws ValueStoreException If the specified directory is invalid.
+	 * @throws IndexMechanismException If the specified directory is invalid.
 	 */
-	public static IndexMechanismImpl getInstance(String folder) throws ValueStoreException
+	public static IndexMechanismImpl getInstance(String folder) throws IndexMechanismException
 	{
 		// Check if we already have a ValueStoreImpl for this folder.
 		if (valueStores.containsKey(folder))

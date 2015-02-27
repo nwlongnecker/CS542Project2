@@ -1,7 +1,7 @@
 package indexmechanism.main;
 
 import indexmechanism.IIndexMechanism;
-import indexmechanism.ValueStoreException;
+import indexmechanism.IndexMechanismException;
 import indexmechanism.IndexMechanismImpl;
 
 /**
@@ -39,7 +39,7 @@ public class SampleMain
 //			System.out.println(new String(newValue));
 			
 		}
-		catch (ValueStoreException e)
+		catch (IndexMechanismException e)
 		{
 			// Only throws an exception if the specified directory is invalid.
 			e.printStackTrace();

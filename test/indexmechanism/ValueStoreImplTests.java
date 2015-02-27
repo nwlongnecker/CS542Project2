@@ -1,6 +1,6 @@
 package indexmechanism;
 
-import indexmechanism.ValueStoreException;
+import indexmechanism.IndexMechanismException;
 import indexmechanism.IndexMechanismImpl;
 
 import java.io.File;
@@ -17,7 +17,7 @@ import static org.junit.Assert.*;
 public class ValueStoreImplTests {
 	
 	@Test
-	public void testInitalize() throws ValueStoreException {
+	public void testInitalize() throws IndexMechanismException {
 		// Create a file to represent the db loc
 		String dbLoc = "db";
 		File directory = new File(dbLoc);
@@ -35,7 +35,7 @@ public class ValueStoreImplTests {
 	}
 	
 	@Test
-	public void testInitalizeDefault() throws ValueStoreException {
+	public void testInitalizeDefault() throws IndexMechanismException {
 		File directory = new File(IndexMechanismImpl.DEFAULT_LOCATION);
 		IndexMechanismImpl vs = IndexMechanismImpl.getInstance();
 		assertEquals("database/", vs.databaseFolder);
@@ -43,7 +43,7 @@ public class ValueStoreImplTests {
 	}
 	
 	@Test
-	public void testInitalizeFolderAlreadyExists() throws ValueStoreException {
+	public void testInitalizeFolderAlreadyExists() throws IndexMechanismException {
 		// Create a file to represent the db loc
 		String dbLoc = "db1";
 		File directory = new File(dbLoc);
@@ -61,7 +61,7 @@ public class ValueStoreImplTests {
 	}
 	
 	@Test
-	public void testInitalizeFolderContainsDirectories() throws IOException, ValueStoreException {
+	public void testInitalizeFolderContainsDirectories() throws IOException, IndexMechanismException {
 		// Create a file to represent the db loc
 		String dbLoc = "db2";
 		File directory = new File(dbLoc);
@@ -76,13 +76,13 @@ public class ValueStoreImplTests {
 		try {
 			IndexMechanismImpl.getInstance(dbLoc);
 			fail();
-		} catch (ValueStoreException e) {
+		} catch (IndexMechanismException e) {
 			IndexMechanismImpl.deleteFolder(directory);
 		}
 	}
 	
 	@Test
-	public void testCleanUp() throws ValueStoreException {
+	public void testCleanUp() throws IndexMechanismException {
 		String dbLoc = "db3";
 		File directory = new File(dbLoc);
 		// If the directory already exists, delete it
@@ -98,7 +98,7 @@ public class ValueStoreImplTests {
 	}
 	
 	@Test
-	public void testCleanUpWithContents() throws IOException, ValueStoreException {
+	public void testCleanUpWithContents() throws IOException, IndexMechanismException {
 		String dbLoc = "db4";
 		File directory = new File(dbLoc);
 		// If the directory already exists, delete it
@@ -117,7 +117,7 @@ public class ValueStoreImplTests {
 	}
 	
 	@Test
-	public void testCleanUpWithDirectoriesAsContents() throws IOException, ValueStoreException {
+	public void testCleanUpWithDirectoriesAsContents() throws IOException, IndexMechanismException {
 		String dbLoc = "db5";
 		File directory = new File(dbLoc);
 		// If the directory already exists, delete it
@@ -136,7 +136,7 @@ public class ValueStoreImplTests {
 	}
 
 	@Test
-	public void testPutNewFile() throws FileNotFoundException, IOException, ValueStoreException {
+	public void testPutNewFile() throws FileNotFoundException, IOException, IndexMechanismException {
 		// Test that put creates a new file with specific contents
 		String dirName = "test1";
 		IndexMechanismImpl vs = IndexMechanismImpl.getInstance(dirName);
@@ -174,7 +174,7 @@ public class ValueStoreImplTests {
 	}
 	
 	@Test
-	public void testPutExistingFile() throws FileNotFoundException, IOException, ValueStoreException {
+	public void testPutExistingFile() throws FileNotFoundException, IOException, IndexMechanismException {
 		// Test that put replaces an existing file
 		String dirName = "test2";
 		IndexMechanismImpl vs = IndexMechanismImpl.getInstance(dirName);
@@ -213,7 +213,7 @@ public class ValueStoreImplTests {
 	}
 	
 	@Test
-	public void testPutNonemptyExistingFile() throws FileNotFoundException, IOException, ValueStoreException {
+	public void testPutNonemptyExistingFile() throws FileNotFoundException, IOException, IndexMechanismException {
 		// Test that put completely replaces the contents of a file
 		String dirName = "test3";
 		IndexMechanismImpl vs = IndexMechanismImpl.getInstance(dirName);
@@ -268,7 +268,7 @@ public class ValueStoreImplTests {
 	}
 	
 	@Test
-	public void testRemove() throws IOException, ValueStoreException {
+	public void testRemove() throws IOException, IndexMechanismException {
 		// Test that remove deletes an existing file
 		String dirName = "test4";
 		IndexMechanismImpl vs = IndexMechanismImpl.getInstance(dirName);
@@ -289,7 +289,7 @@ public class ValueStoreImplTests {
 	}
 	
 	@Test
-	public void testRemoveInvalidFile() throws ValueStoreException {
+	public void testRemoveInvalidFile() throws IndexMechanismException {
 		// Test that remove deletes an existing file
 		String dirName = "test5";
 		IndexMechanismImpl vs = IndexMechanismImpl.getInstance(dirName);
@@ -310,7 +310,7 @@ public class ValueStoreImplTests {
 	}
 	
 	@Test
-	public void testGetFile() throws ValueStoreException {
+	public void testGetFile() throws IndexMechanismException {
 		// Test that get gets the contents of a file
 		String dirName = "test6";
 		IndexMechanismImpl vs = IndexMechanismImpl.getInstance(dirName);
@@ -327,7 +327,7 @@ public class ValueStoreImplTests {
 	}
 	
 	@Test
-	public void testGetFileDoesntExist() throws ValueStoreException {
+	public void testGetFileDoesntExist() throws IndexMechanismException {
 		// Test that get returns null if the file doesn't exist
 		String dirName = "test7";
 		IndexMechanismImpl vs = IndexMechanismImpl.getInstance(dirName);

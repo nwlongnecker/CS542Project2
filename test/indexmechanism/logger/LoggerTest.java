@@ -1,7 +1,7 @@
 package indexmechanism.logger;
 
 import static org.junit.Assert.*;
-import indexmechanism.ValueStoreException;
+import indexmechanism.IndexMechanismException;
 import indexmechanism.IndexMechanismImpl;
 import indexmechanism.logger.Logger;
 import indexmechanism.logger.Transaction;
@@ -26,7 +26,7 @@ public class LoggerTest {
 	IndexMechanismImpl valueStore;
 	
 	@Before
-	public void setup() throws ValueStoreException {
+	public void setup() throws IndexMechanismException {
 		valueStore = IndexMechanismImpl.getInstance(testLoggerDB);
 		logger = new Logger(valueStore);
 	}
