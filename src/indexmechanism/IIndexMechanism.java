@@ -22,5 +22,5 @@ public interface IIndexMechanism
 	 * Remove the data in the index mechanism for the given key.
 	 * @param key The key associated with the data to remove.
 	 */
-	void remove(int key);
+	void remove(String key);
 }
