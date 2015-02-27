@@ -1,6 +1,6 @@
 package indexmechanism.logger;
 
-import indexmechanism.ValueStoreImpl;
+import indexmechanism.IndexMechanismImpl;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -28,7 +28,7 @@ public class Logger {
 	 * Constructor for a value store logger.
 	 * @param databaseFolder The folder for the value store.
 	 */
-	public Logger(ValueStoreImpl valueStore) {
+	public Logger(IndexMechanismImpl valueStore) {
 		this.logFile = valueStore.getDatabaseFolder() + LOG_FILE;
 		File currentLog = new File(logFile);
 		File tempLog = new File(logFile+".tmp");

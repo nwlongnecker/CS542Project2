@@ -19,13 +19,13 @@ import java.util.UUID;
  * Represents an implementation of a data store that can keep
  * track of byte data with respect to integer keys.
  */
-public class ValueStoreImpl implements IValueStore
+public class IndexMechanismImpl implements IIndexMechanism
 {
 	// Static string contianing the default database folder location.
 	static final String DEFAULT_LOCATION = "database";
 
 	// HashMap to store the ValueStoreImpl objects for each database.
-	static final HashMap<String, ValueStoreImpl> valueStores = new HashMap<String, ValueStoreImpl>();
+	static final HashMap<String, IndexMechanismImpl> valueStores = new HashMap<String, IndexMechanismImpl>();
 	
 	
 	// String that contains the path to the database folder.
@@ -46,7 +46,7 @@ public class ValueStoreImpl implements IValueStore
 	 * @param folder Path to the folder to store database files.
 	 * @throws ValueStoreException If the specified directory is invalid.
 	 */
-	private ValueStoreImpl(String folder) throws ValueStoreException
+	private IndexMechanismImpl(String folder) throws ValueStoreException
 	{	
 		databaseFolder = folder + "/";
 		lockManager = new LockManager();
@@ -75,7 +75,7 @@ public class ValueStoreImpl implements IValueStore
 	 * @return The value store for the default folder.
 	 * @throws ValueStoreException If the specified directory is invalid.
 	 */
-	public static ValueStoreImpl getInstance() throws ValueStoreException
+	public static IndexMechanismImpl getInstance() throws ValueStoreException
 	{
 		return getInstance(DEFAULT_LOCATION);
 	}
@@ -86,7 +86,7 @@ public class ValueStoreImpl implements IValueStore
 	 * @return The value store for the given folder.
 	 * @throws ValueStoreException If the specified directory is invalid.
 	 */
-	public static ValueStoreImpl getInstance(String folder) throws ValueStoreException
+	public static IndexMechanismImpl getInstance(String folder) throws ValueStoreException
 	{
 		// Check if we already have a ValueStoreImpl for this folder.
 		if (valueStores.containsKey(folder))
@@ -97,7 +97,7 @@ public class ValueStoreImpl implements IValueStore
 		else
 		{
 			// Create a new ValueStoreImpl object for the folder.
-			ValueStoreImpl valueStore = new ValueStoreImpl(folder);
+			IndexMechanismImpl valueStore = new IndexMechanismImpl(folder);
 			
 			// Add the object to the HashMap, then return it.
 			valueStores.put(folder, valueStore);
@@ -105,7 +105,6 @@ public class ValueStoreImpl implements IValueStore
 		}
 	}
 	
-	@Override
 	public void put(int key, byte[] data)
 	{
 		UUID opid;
@@ -127,7 +126,6 @@ public class ValueStoreImpl implements IValueStore
 		}
 	}
 
-	@Override
 	public byte[] get(int key)
 	{
 		// No logging necessary for read function, just grab the read lock for the key.
@@ -306,5 +304,17 @@ public class ValueStoreImpl implements IValueStore
 		}
 		// For posterity.
 		return true;
+	}
+
+	@Override
+	public void put(String key, String dataValue) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public String get(String dataValue) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

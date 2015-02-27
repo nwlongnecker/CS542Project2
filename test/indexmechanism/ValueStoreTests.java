@@ -2,7 +2,7 @@ package indexmechanism;
 
 import indexmechanism.IValueStore;
 import indexmechanism.ValueStoreException;
-import indexmechanism.ValueStoreImpl;
+import indexmechanism.IndexMechanismImpl;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -25,7 +25,7 @@ public class ValueStoreTests {
 					// Try to create a new value store object
 					try {
 						// Create the database in the stressTest folder
-						IValueStore vs = ValueStoreImpl.getInstance("stressTest");
+						IValueStore vs = IndexMechanismImpl.getInstance("stressTest");
 
 						// Make random behavior
 						Random r = new Random();
@@ -74,7 +74,7 @@ public class ValueStoreTests {
 	@Test
 	public void valueStoreSizeTest() {
 		try {
-			IValueStore vs = ValueStoreImpl.getInstance("sizeTest");
+			IValueStore vs = IndexMechanismImpl.getInstance("sizeTest");
 			byte[] largeData = new byte[500000000];
 			vs.put(1, largeData);
 			assertTrue(vs.get(1).length == 500000000);
