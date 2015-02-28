@@ -11,8 +11,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -26,20 +28,25 @@ public class IndexMechanismImpl implements IIndexMechanism
 
 	// HashMap to store the ValueStoreImpl objects for each database.
 	static final HashMap<String, IndexMechanismImpl> valueStores = new HashMap<String, IndexMechanismImpl>();
-	
-	
+
+
 	// String that contains the path to the database folder.
 	final String databaseFolder;
-	
+
 	// Lock manager for the value store object.
 	final LockManager lockManager;
-	
+
 	// Logger for the value store object.
 	final Logger logger;
-	
+
 	// Lock for the logger.
 	final Object loggerLock;
-	
+
+
+	int roundRobinNum;
+	int roundRobinOrder;
+	List<Bucket> buckets;
+
 
 	/**
 	 * Constructor that allows the database folder to be specified.
@@ -52,24 +59,28 @@ public class IndexMechanismImpl implements IIndexMechanism
 		lockManager = new LockManager();
 		logger = new Logger(this);
 		loggerLock = new Object();
-		
+
+		roundRobinNum = 0;
+		roundRobinOrder = 2;
+		buckets = new ArrayList<Bucket>();
+
 		// Make the database directory.
 		File databaseDir = new File(databaseFolder);
 		databaseDir.mkdir();
-		
+
 		File[] files = databaseDir.listFiles();
-	    if (files != null) // Some JVMs return null for empty dirs.
-	    {
-	        for (File f : files)
-	        {
-	            if (f.isDirectory())
-	            {
-	                throw new IndexMechanismException("Invalid database directory. Database directory cannot contain directories.");
-	            }
-	        }
-	    }
+		if (files != null) // Some JVMs return null for empty dirs.
+		{
+			for (File f : files)
+			{
+				if (f.isDirectory())
+				{
+					throw new IndexMechanismException("Invalid database directory. Database directory cannot contain directories.");
+				}
+			}
+		}
 	}
-	
+
 	/**
 	 * Calls the getInstance method using the default database folder location.
 	 * @return The value store for the default folder.
@@ -79,7 +90,7 @@ public class IndexMechanismImpl implements IIndexMechanism
 	{
 		return getInstance(DEFAULT_LOCATION);
 	}
-	
+
 	/**
 	 * Gets the instance of ValueStoreImpl for the given folder.
 	 * @param folder The folder location to use for the value store.
@@ -98,13 +109,13 @@ public class IndexMechanismImpl implements IIndexMechanism
 		{
 			// Create a new ValueStoreImpl object for the folder.
 			IndexMechanismImpl valueStore = new IndexMechanismImpl(folder);
-			
+
 			// Add the object to the HashMap, then return it.
 			valueStores.put(folder, valueStore);
 			return valueStore;
 		}
 	}
-	
+
 	public void put(int key, byte[] data)
 	{
 		UUID opid;
@@ -114,10 +125,10 @@ public class IndexMechanismImpl implements IIndexMechanism
 			// Log that we're going to do a write.
 			opid = logger.logTransaction(new WriteTransaction("" + key, data));
 		}
-		
+
 		// Write the new data to the key.
 		writeKey(key, data);
-		
+
 		// Make sure no two threads are logging at the same time.
 		synchronized(loggerLock)
 		{
@@ -130,16 +141,16 @@ public class IndexMechanismImpl implements IIndexMechanism
 	{
 		// No logging necessary for read function, just grab the read lock for the key.
 		lockManager.lockKey(key, LockType.READ);
-		
+
 		// Check that a file exists for the key.
 		File dataFile = new File(databaseFolder + key);
-		
+
 		// Get a reader for the file containing the data.
 		try (FileInputStream fileReader = new FileInputStream(databaseFolder + key))
 		{
 			// Create a byte array to store the data from the file.
 			int dataLength = (int) dataFile.length();
-			
+
 			// Attempt to read until we have all the data.
 			byte[] data = null;
 			int bytesRead = 0;
@@ -157,18 +168,18 @@ public class IndexMechanismImpl implements IIndexMechanism
 					break;
 				}
 			}
-			
+
 			// Release the read lock for the key.
 			lockManager.unlockKey(key, LockType.READ);
-			
+
 			// Return the data from the file.
 			return data;
 		}
 		catch (IOException e) {}
-		
+
 		// Release the read lock for the key.
 		lockManager.unlockKey(key, LockType.READ);
-		
+
 		// There is no data in the value store for this key.
 		return null;
 	}
@@ -183,7 +194,7 @@ public class IndexMechanismImpl implements IIndexMechanism
 			// Log that we're going to do a delete.
 			opid = logger.logTransaction(new DeleteTransaction("" + key));
 		}
-		
+
 		// Delete the key from our value store.
 		deleteKey(key);
 
@@ -194,7 +205,7 @@ public class IndexMechanismImpl implements IIndexMechanism
 			logger.endTransaction(opid);
 		}
 	}
-	
+
 	/**
 	 * Delete the old key (file) if it exists and create a new one with the data.
 	 * @param key The name for the file (an integer).
@@ -204,11 +215,11 @@ public class IndexMechanismImpl implements IIndexMechanism
 	{
 		// Grab the write lock for the key.
 		lockManager.lockKey(key, LockType.WRITE);
-		
+
 		// Delete the file if it already exists.
 		File dataFile = new File(databaseFolder + key);
 		dataFile.delete();
-		
+
 		// Create a new file to store the data.
 		try (FileOutputStream fileWriter = new FileOutputStream(databaseFolder + key))
 		{
@@ -216,11 +227,11 @@ public class IndexMechanismImpl implements IIndexMechanism
 			fileWriter.write(data);
 		}
 		catch (IOException e) {}
-		
+
 		// Release the write lock for the key.
 		lockManager.unlockKey(key, LockType.WRITE);
 	}
-	
+
 	/**
 	 * Delete the key (file) if it exists.
 	 * @param key The name for the file (an integer).
@@ -229,15 +240,15 @@ public class IndexMechanismImpl implements IIndexMechanism
 	{
 		// Grab the write lock for the key.
 		lockManager.lockKey(key, LockType.WRITE);
-				
+
 		// Delete the file for this key if it exists.
 		File dataFile = new File(databaseFolder + key);
 		dataFile.delete();
-				
+
 		// Release the write lock for the key.
 		lockManager.unlockKey(key, LockType.WRITE);
 	}
-	
+
 	/**
 	 * Deletes all traces of the database off the disk. Mostly used for cleaning up after tests.
 	 */
@@ -247,31 +258,31 @@ public class IndexMechanismImpl implements IIndexMechanism
 		File databaseDir = new File(databaseFolder);
 		deleteFolder(databaseDir);
 	}
-	
+
 	/**
 	 * Recursively deletes the files in a folder, then the folder itself.
 	 * @param folder The folder file to delete.
 	 */
 	static void deleteFolder(File folder)
 	{
-	    File[] files = folder.listFiles();
-	    if (files != null) // Some JVMs return null for empty dirs.
-	    {
-	        for (File f : files)
-	        {
-	            if (f.isDirectory())
-	            {
-	                deleteFolder(f);
-	            }
-	            else
-	            {
-	                f.delete();
-	            }
-	        }
-	    }
-	    folder.delete();
+		File[] files = folder.listFiles();
+		if (files != null) // Some JVMs return null for empty dirs.
+		{
+			for (File f : files)
+			{
+				if (f.isDirectory())
+				{
+					deleteFolder(f);
+				}
+				else
+				{
+					f.delete();
+				}
+			}
+		}
+		folder.delete();
 	}
-	
+
 	/**
 	 * Getter for the database folder.
 	 * @return String for the database folder.
@@ -280,7 +291,7 @@ public class IndexMechanismImpl implements IIndexMechanism
 	{
 		return databaseFolder;
 	}
-	
+
 	/**
 	 * In case we crashed while transactions were occurring, recover by executing them.
 	 * @param unfinishedTransactions Transactions to complete.
@@ -307,14 +318,46 @@ public class IndexMechanismImpl implements IIndexMechanism
 	}
 
 	@Override
-	public void put(String key, String dataValue) {
-		// TODO Auto-generated method stub
-		
+	public void put(String key, String dataValue)
+	{
+		Index toAdd = new Index(key, dataValue);
+		int bucketNum = dataValue.hashCode() % (1 << roundRobinOrder);
+		if (bucketNum > buckets.size())
+		{
+			bucketNum = dataValue.hashCode() % (1 << (roundRobinOrder - 1));
+		}
+		buckets.get(bucketNum).add(toAdd);
+		if (buckets.get(bucketNum).hasOverflow())
+		{
+			buckets.add(buckets.get(roundRobinNum).split(roundRobinOrder));
+			roundRobinNum++;
+			if (roundRobinNum == ((1 << roundRobinOrder) - 1))
+			{
+				roundRobinOrder++;
+				roundRobinNum = 0;
+			}
+		}
 	}
 
 	@Override
-	public String get(String dataValue) {
-		// TODO Auto-generated method stub
-		return null;
+	public String get(String dataValue)
+	{
+		int bucketNum = dataValue.hashCode() % (1 << roundRobinOrder);
+		if (bucketNum > buckets.size())
+		{
+			bucketNum = dataValue.hashCode() % (1 << (roundRobinOrder - 1));
+		}
+		return buckets.get(bucketNum).get(dataValue);
+	}
+
+	@Override
+	public void remove(String key)
+	{
+		int bucketNum = key.hashCode() % (1 << roundRobinOrder);
+		if (bucketNum > buckets.size())
+		{
+			bucketNum = key.hashCode() % (1 << (roundRobinOrder - 1));
+		}
+		buckets.get(bucketNum).remove(key);
 	}
 }
