@@ -6,7 +6,13 @@ package indexmechanism;
  */
 public class Index {
 	
+	/**
+	 * The key of this index. An identifier that the database could use to find the associated tuple on the in the database
+	 */
 	private String key;
+	/**
+	 * The 
+	 */
 	private String dataValue;
 
 	public Index(String key, String dataValue) {
