@@ -1,6 +1,8 @@
 package indexmechanism;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -12,7 +14,7 @@ public class Bucket {
 	/**
 	 * A set for storing the indices in this bucket
 	 */
-	private final Set<Index> set;
+	final List<Index> list;
 	/**
 	 * The maximum size of a bucket
 	 */
@@ -21,14 +23,14 @@ public class Bucket {
 	/**
 	 * The next bucket in the linked list of indices
 	 */
-	private Bucket nextBucket;
+	Bucket nextBucket;
 
 	/**
 	 * Constructor.
 	 * Constructs a new bucket object for storing indices in.
 	 */
 	public Bucket() {
-		set = new HashSet<Index>();
+		list = new ArrayList<Index>();
 		nextBucket = null;
 	}
 	
@@ -36,15 +38,16 @@ public class Bucket {
 	 * If the bucket is not full, add the specified index to the bucket.
 	 * Otherwise, puts it in the next bucket in the chain.
 	 * @param toAdd The index to add to the bucket chain.
+	 * @return Returns whether the add was successful
 	 */
-	public void add(Index toAdd) {
-		if (set.size() < MAX_BUCKET_SIZE) {
-			set.add(toAdd);
+	public boolean add(Index toAdd) {
+		if (list.size() < MAX_BUCKET_SIZE) {
+			return list.add(toAdd);
 		} else if (nextBucket == null) {
 			nextBucket = new Bucket();
-			nextBucket.add(toAdd);
+			return nextBucket.add(toAdd);
 		} else {
-			nextBucket.add(toAdd);
+			return nextBucket.add(toAdd);
 		}
 	}
 	
@@ -54,7 +57,7 @@ public class Bucket {
 	 * @return Returns true if the index was successfully removed.
 	 */
 	public Index get(String dataValue) {
-		for(Index i : set) {
+		for(Index i : list) {
 			if (i.getDataValue().equals(dataValue)) {
 				return i;
 			}
@@ -73,21 +76,38 @@ public class Bucket {
 	 */
 	public boolean remove(String key) {
 		Index toRemove = null;
-		for(Index i : set) {
+		for(Index i : list) {
 			if (i.getKey().equals(key)) {
 				toRemove = i;
 				break;
 			}
 		}
 		if (toRemove != null) {
-			return set.remove(toRemove);;
+			boolean retVal = list.remove(toRemove);
+			if (nextBucket != null) {
+				Index shiftIndex = nextBucket.getAnIndex();
+				nextBucket.remove(shiftIndex.getKey());
+				if (nextBucket.list.size() == 0) {
+					nextBucket = null;
+				}
+				list.add(shiftIndex);
+			}
+			return retVal;
 		} else if (nextBucket != null) {
-			return nextBucket.remove(key);
+			boolean retVal = nextBucket.remove(key);
+			if (nextBucket.list.size() == 0) {
+				nextBucket = null;
+			}
+			return retVal;
 		} else {
 			return false;
 		}
 	}
 	
+	private Index getAnIndex() {
+		return list.get(0);
+	}
+
 	/**
 	 * Checks whether the bucket chain is overflowing.
 	 * @return Returns true if this bucket chain is overflowing.
@@ -96,8 +116,30 @@ public class Bucket {
 		return nextBucket != null;
 	}
 	
+	/**
+	 * Splits the bucket chain on the specified order
+	 * @param order The order of the hash to split on
+	 * @return Returns the head of a new bucket chain with all the elements with a 1 at the beginning of the new order.
+	 */
 	public Bucket split(int order) {
-		return null;
+		Bucket splitBucket = new Bucket();
+		for (int i = 0; i < list.size(); i++) {
+			int computeHash = list.get(i).getDataValue().hashCode() % (1 << order);
+			if ((computeHash >> (order-1)) == 1) {
+				Index toSplit = list.get(i--);
+				remove(toSplit.getKey());
+				splitBucket.add(toSplit);
+			}
+		}
+		if (nextBucket != null) {
+			Bucket nextSplitBucket = nextBucket.split(order);
+			while (!nextSplitBucket.list.isEmpty()) {
+				Index toMove = nextSplitBucket.list.get(0);
+				splitBucket.add(toMove);
+				nextSplitBucket.remove(toMove.getKey());
+			}
+		}
+		return splitBucket;
 	}
 
 }

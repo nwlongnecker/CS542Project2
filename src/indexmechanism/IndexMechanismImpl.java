@@ -184,7 +184,6 @@ public class IndexMechanismImpl implements IIndexMechanism
 		return null;
 	}
 
-	@Override
 	public void remove(int key)
 	{
 		UUID opid;
@@ -347,7 +346,7 @@ public class IndexMechanismImpl implements IIndexMechanism
 		{
 			bucketNum = dataValue.hashCode() % (1 << (roundRobinOrder - 1));
 		}
-		return buckets.get(bucketNum).get(dataValue);
+		return buckets.get(bucketNum).get(dataValue).getKey();
 	}
 
 	@Override

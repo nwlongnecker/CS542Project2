@@ -15,6 +15,7 @@ public interface IIndexMechanism
 	/**
 	 * Get data from the index mechanism.
 	 * @param dataValue The data to search the index mechanism for.
+	 * @return Returns the key of the given index.
 	 */
 	String get(String dataValue);
 	

@@ -7,11 +7,11 @@ package indexmechanism;
 public class Index {
 	
 	/**
-	 * The key of this index. An identifier that the database could use to find the associated tuple on the in the database
+	 * The key of this index. An identifier that the database could use to find the associated tuple in the database
 	 */
 	private String key;
 	/**
-	 * The 
+	 * The data value of this index. The indexed value.
 	 */
 	private String dataValue;
 
