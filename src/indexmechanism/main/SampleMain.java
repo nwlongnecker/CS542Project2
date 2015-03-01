@@ -26,7 +26,7 @@ public class SampleMain
 			
 			// Retrieve a key for a value and print it out.
 			String key = im.get("world");
-			System.out.println(new String(key));
+			System.out.println(key);
 			
 			// Remove an index.
 			im.remove("secondKey");
@@ -36,8 +36,9 @@ public class SampleMain
 			
 			// Retrieve the new value value and print it out.
 			String newKey = im.get("world");
-			System.out.println(new String(newKey));
+			System.out.println(newKey);
 			
+			IndexMechanismImpl.getInstance("maindb").cleanUp();
 		}
 		catch (IndexMechanismException e)
 		{
