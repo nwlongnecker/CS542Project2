@@ -41,7 +41,7 @@ public class Logger {
 	 * @param listOBuckets The current state of the index
 	 */
 	public void logChange(List<Bucket> listOBuckets) {
-		try (ObjectOutputStream writer = new ObjectOutputStream(new FileOutputStream(logFile+".tmp"))) {
+		try (ObjectOutputStream writer = new ObjectOutputStream(new FileOutputStream(logFile + ".tmp"))) {
 			writer.writeObject(listOBuckets);
 			writer.flush();
 		}
@@ -51,7 +51,7 @@ public class Logger {
 		File oldLog = new File(logFile);
 		oldLog.delete();
 		
-		File newLog = new File(logFile+".tmp");
+		File newLog = new File(logFile + ".tmp");
 		newLog.renameTo(oldLog);
 	}
 

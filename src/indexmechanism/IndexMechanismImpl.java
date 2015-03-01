@@ -41,7 +41,6 @@ public class IndexMechanismImpl implements IIndexMechanism
 	private IndexMechanismImpl(String folder) throws IndexMechanismException
 	{	
 		databaseFolder = folder + "/";
-		logger = new Logger(this);
 		roundRobinNum = 0;
 		roundRobinOrder = 2;
 		buckets = new ArrayList<Bucket>();
@@ -52,6 +51,7 @@ public class IndexMechanismImpl implements IIndexMechanism
 			buckets.add(new Bucket());
 		}
 
+		logger = new Logger(this);
 		// Make the database directory.
 		File databaseDir = new File(databaseFolder);
 		databaseDir.mkdir();
@@ -159,7 +159,7 @@ public class IndexMechanismImpl implements IIndexMechanism
 		
 		// Calculate the round robin number/order based on the number of buckets.
 		roundRobinOrder = (int)(Math.log(buckets.size()) / Math.log(2));
-		roundRobinNum = buckets.size() - (1 << roundRobinOrder);
+		roundRobinNum = buckets.size() + 1 - (1 << roundRobinOrder);
 		
 		// For posterity.
 		return true;
