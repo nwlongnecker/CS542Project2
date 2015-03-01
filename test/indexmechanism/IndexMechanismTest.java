@@ -43,9 +43,9 @@ public class IndexMechanismTest {
 							}
 							// Otherwise, get the value there
 							else {
-								String value = im.get(key);
-								if(value != null) {
-									assertEquals("value" + key, value);
+								String returnedKey = im.get("value" + key);
+								if(returnedKey != null) {
+									assertEquals(key, returnedKey);
 								}
 							}
 						}
