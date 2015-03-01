@@ -12,7 +12,7 @@ public class IndexMechanismTest {
 	@Test
 	public void indexMechanismStressTest() {
 		ArrayList<Thread> threads = new ArrayList<Thread>();
-		// Create 100 threads
+		// Create 50 threads
 		for(int i = 0; i < 50; i++) {
 			// Define the thread object
 			Thread t = new Thread() {
@@ -25,7 +25,7 @@ public class IndexMechanismTest {
 
 						// Make random behavior
 						Random r = new Random();
-						// Do random operations 25 times
+						// Do random operations 10 times
 						for(int j = 0; j < 10; j++) {
 							int operationType = Math.abs(r.nextInt()) % 3;
 							String key = Integer.toString(Math.abs(r.nextInt()) % 10);
