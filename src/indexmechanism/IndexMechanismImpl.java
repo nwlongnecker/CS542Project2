@@ -27,7 +27,7 @@ public class IndexMechanismImpl implements IIndexMechanism
 	static final String DEFAULT_LOCATION = "database";
 
 	// HashMap to store the ValueStoreImpl objects for each database.
-	static final HashMap<String, IndexMechanismImpl> valueStores = new HashMap<String, IndexMechanismImpl>();
+	static final HashMap<String, IndexMechanismImpl> indexMechanisms = new HashMap<String, IndexMechanismImpl>();
 
 
 	// String that contains the path to the database folder.
@@ -100,19 +100,25 @@ public class IndexMechanismImpl implements IIndexMechanism
 	public static synchronized IndexMechanismImpl getInstance(String folder) throws IndexMechanismException
 	{
 		// Check if we already have a ValueStoreImpl for this folder.
-		if (valueStores.containsKey(folder))
+		if (indexMechanisms.containsKey(folder))
 		{
 			// Return the existing ValueStoreImpl object.
-			return valueStores.get(folder);
+			return indexMechanisms.get(folder);
 		}
 		else
 		{
-			// Create a new ValueStoreImpl object for the folder.
-			IndexMechanismImpl valueStore = new IndexMechanismImpl(folder);
+			// Create a new IndexMechanismImpl object for the folder.
+			IndexMechanismImpl indexMechanism = new IndexMechanismImpl(folder);
+
+			// Add four empty buckets to it.
+			for (int i = 0; i < 4; i++)
+			{
+				indexMechanism.buckets.add(new Bucket());
+			}
 
 			// Add the object to the HashMap, then return it.
-			valueStores.put(folder, valueStore);
-			return valueStore;
+			indexMechanisms.put(folder, indexMechanism);
+			return indexMechanism;
 		}
 	}
 
