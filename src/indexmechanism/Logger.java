@@ -31,7 +31,9 @@ public class Logger {
 			tempLog.renameTo(currentLog);
 		}
 		List<Bucket> listOBuckets = readLog();
-		indexMechanism.recover(listOBuckets);
+		if (listOBuckets != null) {
+			indexMechanism.recover(listOBuckets);
+		}
 	}
 	
 	/**

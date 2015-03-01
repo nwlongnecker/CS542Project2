@@ -25,16 +25,15 @@ public class LoggerTest {
 		indexMechanism.cleanUp();
 	}
 	
-//	@Test
-//	public void testWriteAndRead() {
-//		indexMechanism.put("MyKey", "DataValue");
+	@Test
+	public void testWriteAndRead() throws Exception {
+		indexMechanism.put("MyKey", "DataValue");
+		assertEquals("MyKey", indexMechanism.get("DataValue"));
+		indexMechanism.buckets.clear();
+		IndexMechanismImpl.indexMechanisms.clear();
+		indexMechanism = IndexMechanismImpl.getInstance(testLoggerDB);
 //		assertEquals("MyKey", indexMechanism.get("DataValue"));
-//		indexMechanism.buckets.clear();
-//		assertNull(indexMechanism.get("DataValue"));
-//		
-////		indexMechanism.recover(buckets);
-//		assertEquals("MyKey", indexMechanism.get("DataValue"));
-//	}
+	}
 
 //	@Test
 //	public void testLogTransaction() {
