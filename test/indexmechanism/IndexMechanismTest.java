@@ -10,10 +10,10 @@ import org.junit.Test;
 public class IndexMechanismTest {
 
 	@Test
-	public void valueStoreStressTest() {
+	public void indexMechanismStressTest() {
 		ArrayList<Thread> threads = new ArrayList<Thread>();
 		// Create 100 threads
-		for(int i = 0; i < 100; i++) {
+		for(int i = 0; i < 50; i++) {
 			// Define the thread object
 			Thread t = new Thread() {
 				// Define what the thread will do
@@ -25,8 +25,8 @@ public class IndexMechanismTest {
 
 						// Make random behavior
 						Random r = new Random();
-						// Do random operations 50 times
-						for(int j = 0; j < 50; j++) {
+						// Do random operations 25 times
+						for(int j = 0; j < 10; j++) {
 							int operationType = Math.abs(r.nextInt()) % 3;
 							String key = Integer.toString(Math.abs(r.nextInt()) % 10);
 							// If the operation value is 0, delete a key
