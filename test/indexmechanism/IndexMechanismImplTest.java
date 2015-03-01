@@ -66,5 +66,24 @@ public class IndexMechanismImplTest {
 		assertNotNull(im.get("myDataValue4"));
 		assertNotNull(im.get("myDataValue5"));
 	}
+	
+	@Test
+	public void testRemoveAll() {
+		im.put("myKey1", "myDataValue1");
+		im.put("myKey2", "myDataValue2");
+		im.put("myKey3", "myDataValue3");
+		im.put("myKey4", "myDataValue4");
+		im.put("myKey5", "myDataValue5");
+		im.remove("myKey3");
+		im.remove("myKey2");
+		im.remove("myKey1");
+		im.remove("myKey4");
+		im.remove("myKey5");
+		assertNull(im.get("myDataValue3"));
+		assertNull(im.get("myDataValue1"));
+		assertNull(im.get("myDataValue2"));
+		assertNull(im.get("myDataValue4"));
+		assertNull(im.get("myDataValue5"));
+	}
 
 }
