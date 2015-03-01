@@ -21,22 +21,22 @@ public class SampleMain
 			IIndexMechanism im = IndexMechanismImpl.getInstance("maindb");
 			
 			// Put in a couple values for keys.
-//			vs.put(4, "Hello world".getBytes());
-//			vs.put(7, "Key is seven".getBytes());
-//			
-//			// Retrieve a value and print it out.
-//			byte[] value = vs.get(4);
-//			System.out.println(new String(value));
-//			
-//			// Remove a value.
-//			vs.remove(7);
-//			
-//			// Put a new value to overwrite an old one.
-//			vs.put(4, "New value".getBytes());
-//			
-//			// Retrieve the new value value and print it out.
-//			byte[] newValue = vs.get(4);
-//			System.out.println(new String(newValue));
+			im.put("firstKey", "hello");
+			im.put("secondKey", "world");
+			
+			// Retrieve a key for a value and print it out.
+			String key = im.get("world");
+			System.out.println(new String(key));
+			
+			// Remove an index.
+			im.remove("secondKey");
+			
+			// Put a new key for the old value.
+			im.put("thirdKey", "world");
+			
+			// Retrieve the new value value and print it out.
+			String newKey = im.get("world");
+			System.out.println(new String(newKey));
 			
 		}
 		catch (IndexMechanismException e)
