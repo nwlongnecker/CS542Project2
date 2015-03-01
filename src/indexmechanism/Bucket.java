@@ -1,5 +1,6 @@
 package indexmechanism;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -9,8 +10,12 @@ import java.util.Set;
  * A bucket class for storing sets of indices.
  * @author Nathan
  */
-public class Bucket {
+public class Bucket implements Serializable {
 	
+	/**
+	 * Serial version
+	 */
+	private static final long serialVersionUID = -6450616498625309842L;
 	/**
 	 * A set for storing the indices in this bucket
 	 */

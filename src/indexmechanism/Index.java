@@ -1,11 +1,17 @@
 package indexmechanism;
 
+import java.io.Serializable;
+
 /**
  * Data structure for storing key value pairs
  * @author Nathan
  */
-public class Index {
+public class Index implements Serializable {
 	
+	/**
+	 * Serial version
+	 */
+	private static final long serialVersionUID = 5467006958012824144L;
 	/**
 	 * The key of this index. An identifier that the database could use to find the associated tuple in the database
 	 */
