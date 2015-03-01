@@ -46,6 +46,12 @@ public class IndexMechanismImpl implements IIndexMechanism
 		roundRobinOrder = 2;
 		buckets = new ArrayList<Bucket>();
 
+		// Add four empty buckets.
+		for (int i = 0; i < 4; i++)
+		{
+			buckets.add(new Bucket());
+		}
+
 		// Make the database directory.
 		File databaseDir = new File(databaseFolder);
 		databaseDir.mkdir();
@@ -91,12 +97,6 @@ public class IndexMechanismImpl implements IIndexMechanism
 		{
 			// Create a new IndexMechanismImpl object for the folder.
 			IndexMechanismImpl indexMechanism = new IndexMechanismImpl(folder);
-
-			// Add four empty buckets to it.
-			for (int i = 0; i < 4; i++)
-			{
-				indexMechanism.buckets.add(new Bucket());
-			}
 
 			// Add the object to the HashMap, then return it.
 			indexMechanisms.put(folder, indexMechanism);
@@ -172,7 +172,7 @@ public class IndexMechanismImpl implements IIndexMechanism
 		{
 			// Figure out which bucket we will add it to.
 			int bucketNum = Math.abs(dataValue.hashCode()) % (1 << roundRobinOrder);
-			if (bucketNum > buckets.size())
+			if (bucketNum >= buckets.size())
 			{
 				bucketNum = Math.abs(dataValue.hashCode()) % (1 << (roundRobinOrder - 1));
 			}
