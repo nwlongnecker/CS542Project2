@@ -152,10 +152,14 @@ public class IndexMechanismImpl implements IIndexMechanism
 	 * @param buckets The already existing list of buckets.
 	 * @return Success or failure of the recovery.
 	 */
-	public boolean recover(List<Bucket> buckets)
+	public boolean recover(List<Bucket> oldBuckets)
 	{
 		// Set our bucket list to contain the existing buckets.
-		this.buckets = buckets;
+		buckets = oldBuckets;
+		
+		// Calculate the round robin number/order based on the number of buckets.
+		roundRobinOrder = (int)(Math.log(buckets.size()) / Math.log(2));
+		roundRobinNum = buckets.size() - (1 << roundRobinOrder);
 		
 		// For posterity.
 		return true;
