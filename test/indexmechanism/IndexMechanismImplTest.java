@@ -9,7 +9,7 @@ import org.junit.Test;
 public class IndexMechanismImplTest {
 
 	private static IndexMechanismImpl im;
-	private static final String TEST_FOLDER = "testIndexs";
+	private static final String TEST_FOLDER = "testIndices";
 	
 	@Before
 	public void IndexMechanismImplTestSetup() throws Exception {

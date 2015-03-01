@@ -10,14 +10,12 @@ import org.junit.Test;
 
 public class LoggerTest {
 	
-	Logger logger;
 	final String testLoggerDB = "testLoggerDB";
 	IndexMechanismImpl indexMechanism;
 	
 	@Before
 	public void setup() throws IndexMechanismException {
 		indexMechanism = IndexMechanismImpl.getInstance(testLoggerDB);
-		logger = new Logger(indexMechanism);
 	}
 	
 	@After
@@ -29,10 +27,9 @@ public class LoggerTest {
 	public void testWriteAndRead() throws Exception {
 		indexMechanism.put("MyKey", "DataValue");
 		assertEquals("MyKey", indexMechanism.get("DataValue"));
-		indexMechanism.buckets.clear();
 		IndexMechanismImpl.indexMechanisms.clear();
 		indexMechanism = IndexMechanismImpl.getInstance(testLoggerDB);
-//		assertEquals("MyKey", indexMechanism.get("DataValue"));
+		assertEquals("MyKey", indexMechanism.get("DataValue"));
 	}
 
 //	@Test
