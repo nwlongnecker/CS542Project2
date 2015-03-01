@@ -97,7 +97,7 @@ public class IndexMechanismImpl implements IIndexMechanism
 	 * @return The value store for the given folder.
 	 * @throws IndexMechanismException If the specified directory is invalid.
 	 */
-	public static IndexMechanismImpl getInstance(String folder) throws IndexMechanismException
+	public static synchronized IndexMechanismImpl getInstance(String folder) throws IndexMechanismException
 	{
 		// Check if we already have a ValueStoreImpl for this folder.
 		if (valueStores.containsKey(folder))
@@ -319,16 +319,30 @@ public class IndexMechanismImpl implements IIndexMechanism
 	@Override
 	public void put(String key, String dataValue)
 	{
+		// Create a new index to add.
 		Index toAdd = new Index(key, dataValue);
+
+		// Figure out which bucket we will add it to.
 		int bucketNum = dataValue.hashCode() % (1 << roundRobinOrder);
 		if (bucketNum > buckets.size())
 		{
 			bucketNum = dataValue.hashCode() % (1 << (roundRobinOrder - 1));
 		}
-		buckets.get(bucketNum).add(toAdd);
+
+		// Grab the bucket object and lock on it.
+		Bucket bucket = buckets.get(bucketNum);
+		synchronized (bucket)
+		{
+			// Add the index to the bucket.
+			bucket.add(toAdd);
+		}
+
+		// If the addition caused an overflow, split a bucket via round robin.
 		if (buckets.get(bucketNum).hasOverflow())
 		{
 			buckets.add(buckets.get(roundRobinNum).split(roundRobinOrder));
+
+			// Increment the round robin numbers appropriately.
 			roundRobinNum++;
 			if (roundRobinNum == ((1 << roundRobinOrder) - 1))
 			{
@@ -341,22 +355,39 @@ public class IndexMechanismImpl implements IIndexMechanism
 	@Override
 	public String get(String dataValue)
 	{
+		// Find the bucket that will contain the index for this value if it exists.
 		int bucketNum = dataValue.hashCode() % (1 << roundRobinOrder);
 		if (bucketNum > buckets.size())
 		{
 			bucketNum = dataValue.hashCode() % (1 << (roundRobinOrder - 1));
 		}
-		return buckets.get(bucketNum).get(dataValue).getKey();
+
+		// Grab the bucket object and lock on it.
+		Bucket bucket = buckets.get(bucketNum);
+		synchronized (bucket)
+		{
+			// Return the key for that index if it exists in the bucket.
+			Index index = bucket.get(dataValue);
+			return index == null ? null : index.getKey();
+		}
 	}
 
 	@Override
 	public void remove(String key)
 	{
+		// Find the bucket that will contain the index for this key if it exists.
 		int bucketNum = key.hashCode() % (1 << roundRobinOrder);
 		if (bucketNum > buckets.size())
 		{
 			bucketNum = key.hashCode() % (1 << (roundRobinOrder - 1));
 		}
-		buckets.get(bucketNum).remove(key);
+
+		// Grab the bucket object and lock on it.
+		Bucket bucket = buckets.get(bucketNum);
+		synchronized (bucket)
+		{
+			// Remove the index for the key if it exists in the bucket.
+			buckets.get(bucketNum).remove(key);
+		}
 	}
 }
