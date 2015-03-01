@@ -23,31 +23,28 @@ import java.util.UUID;
  */
 public class IndexMechanismImpl implements IIndexMechanism
 {
-	// Static string contianing the default database folder location.
+	// Static string containing the default database folder location.
 	static final String DEFAULT_LOCATION = "database";
 
 	// HashMap to store the ValueStoreImpl objects for each database.
 	static final HashMap<String, IndexMechanismImpl> indexMechanisms = new HashMap<String, IndexMechanismImpl>();
 
-
 	// String that contains the path to the database folder.
 	final String databaseFolder;
 
-	// Lock manager for the value store object.
-	final LockManager lockManager;
-
-	// Logger for the value store object.
+	// Logger for the index mechanism object.
 	final Logger logger;
 
-	// Lock for the logger.
-	final Object loggerLock;
-
-
+	// Number to keep track of which bucket to split next.
 	int roundRobinNum;
+	
+	// Number to keep track of what the order of the round robin is.
 	int roundRobinOrder;
+	
+	// List to keep all of the buckets for the index mechanism.
 	List<Bucket> buckets;
 
-
+	
 	/**
 	 * Constructor that allows the database folder to be specified.
 	 * @param folder Path to the folder to store database files.
@@ -56,10 +53,7 @@ public class IndexMechanismImpl implements IIndexMechanism
 	private IndexMechanismImpl(String folder) throws IndexMechanismException
 	{	
 		databaseFolder = folder + "/";
-		lockManager = new LockManager();
 		logger = new Logger(this);
-		loggerLock = new Object();
-
 		roundRobinNum = 0;
 		roundRobinOrder = 2;
 		buckets = new ArrayList<Bucket>();
@@ -122,138 +116,6 @@ public class IndexMechanismImpl implements IIndexMechanism
 		}
 	}
 
-	public void put(int key, byte[] data)
-	{
-		UUID opid;
-		// Make sure no two threads are logging at the same time.
-		synchronized(loggerLock)
-		{
-			// Log that we're going to do a write.
-			opid = logger.logTransaction(new WriteTransaction("" + key, data));
-		}
-
-		// Write the new data to the key.
-		writeKey(key, data);
-
-		// Make sure no two threads are logging at the same time.
-		synchronized(loggerLock)
-		{
-			// Log that we've finished the write
-			logger.endTransaction(opid);
-		}
-	}
-
-	public byte[] get(int key)
-	{
-		// No logging necessary for read function, just grab the read lock for the key.
-		lockManager.lockKey(key, LockType.READ);
-
-		// Check that a file exists for the key.
-		File dataFile = new File(databaseFolder + key);
-
-		// Get a reader for the file containing the data.
-		try (FileInputStream fileReader = new FileInputStream(databaseFolder + key))
-		{
-			// Create a byte array to store the data from the file.
-			int dataLength = (int) dataFile.length();
-
-			// Attempt to read until we have all the data.
-			byte[] data = null;
-			int bytesRead = 0;
-			while (bytesRead != dataLength)
-			{
-				// Check that a file exists for the key.
-				if (dataFile.exists())
-				{
-					data = new byte[dataLength];
-					bytesRead = fileReader.read(data);
-				}
-				else // The file does not exist, return null.
-				{
-					data = null;
-					break;
-				}
-			}
-
-			// Release the read lock for the key.
-			lockManager.unlockKey(key, LockType.READ);
-
-			// Return the data from the file.
-			return data;
-		}
-		catch (IOException e) {}
-
-		// Release the read lock for the key.
-		lockManager.unlockKey(key, LockType.READ);
-
-		// There is no data in the value store for this key.
-		return null;
-	}
-
-	public void remove(int key)
-	{
-		UUID opid;
-		// Make sure no two threads are logging at the same time.
-		synchronized(loggerLock)
-		{
-			// Log that we're going to do a delete.
-			opid = logger.logTransaction(new DeleteTransaction("" + key));
-		}
-
-		// Delete the key from our value store.
-		deleteKey(key);
-
-		// Make sure no two threads are logging at the same time.
-		synchronized(loggerLock)
-		{
-			// Log that we've finished the delete
-			logger.endTransaction(opid);
-		}
-	}
-
-	/**
-	 * Delete the old key (file) if it exists and create a new one with the data.
-	 * @param key The name for the file (an integer).
-	 * @param data The bytes to write to the file.
-	 */
-	private void writeKey(int key, byte[] data)
-	{
-		// Grab the write lock for the key.
-		lockManager.lockKey(key, LockType.WRITE);
-
-		// Delete the file if it already exists.
-		File dataFile = new File(databaseFolder + key);
-		dataFile.delete();
-
-		// Create a new file to store the data.
-		try (FileOutputStream fileWriter = new FileOutputStream(databaseFolder + key))
-		{
-			// Write the data to the new empty file.
-			fileWriter.write(data);
-		}
-		catch (IOException e) {}
-
-		// Release the write lock for the key.
-		lockManager.unlockKey(key, LockType.WRITE);
-	}
-
-	/**
-	 * Delete the key (file) if it exists.
-	 * @param key The name for the file (an integer).
-	 */
-	private void deleteKey(int key)
-	{
-		// Grab the write lock for the key.
-		lockManager.lockKey(key, LockType.WRITE);
-
-		// Delete the file for this key if it exists.
-		File dataFile = new File(databaseFolder + key);
-		dataFile.delete();
-
-		// Release the write lock for the key.
-		lockManager.unlockKey(key, LockType.WRITE);
-	}
-
 	/**
 	 * Deletes all traces of the database off the disk. Mostly used for cleaning up after tests.
 	 */
@@ -298,33 +160,22 @@ public class IndexMechanismImpl implements IIndexMechanism
 	}
 
 	/**
-	 * In case we crashed while transactions were occurring, recover by executing them.
-	 * @param unfinishedTransactions Transactions to complete.
+	 * In case we crashed while using the index mechanism, restore the old bucket list.
+	 * @param buckets The already existing list of buckets.
 	 * @return Success or failure of the recovery.
 	 */
-	public boolean recover(Collection<Transaction> unfinishedTransactions)
+	public boolean recover(List<Bucket> buckets)
 	{
-		// Iterate through the unfinished transactions.
-		for (Transaction transaction : unfinishedTransactions)
-		{	
-			if (transaction instanceof WriteTransaction)
-			{
-				// If it was a write transaction, write the data to that key.
-				writeKey(Integer.parseInt(transaction.getFilename()), ((WriteTransaction) transaction).getContents());
-			}
-			else if (transaction instanceof DeleteTransaction)
-			{
-				// If it was a delete transaction, delete the key.
-				deleteKey(Integer.parseInt(transaction.getFilename()));
-			}
-		}
+		// Set our bucket list to contain the existing buckets.
+		this.buckets = buckets;
+		
 		// For posterity.
 		return true;
 	}
 
 	@Override
 	public void put(String key, String dataValue)
-	{
+	{	
 		// Create a new index to add.
 		Index toAdd = new Index(key, dataValue);
 
@@ -354,6 +205,9 @@ public class IndexMechanismImpl implements IIndexMechanism
 					roundRobinNum = 0;
 				}
 			}
+			
+			// Update the log to contain the addition.
+			logger.logChange(buckets);
 		}
 	}
 
@@ -384,13 +238,20 @@ public class IndexMechanismImpl implements IIndexMechanism
 		{
 			// Iterate through the buckets until we find the one containing
 			// the index with the key that we want to remove.
+			boolean foundIndex = false;
 			for (Bucket bucket : buckets)
 			{
 				// If we find the bucket with the key, we are done.
 				if (bucket.remove(key))
 				{
+					foundIndex = true;
 					break;
 				}
+			}
+			if (foundIndex)
+			{
+				// Update the log to contain the deletion.
+				logger.logChange(buckets);
 			}
 		}
 	}
