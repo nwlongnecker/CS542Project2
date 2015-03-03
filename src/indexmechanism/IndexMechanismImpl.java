@@ -158,8 +158,8 @@ public class IndexMechanismImpl implements IIndexMechanism
 		buckets = oldBuckets;
 		
 		// Calculate the round robin number/order based on the number of buckets.
-		roundRobinOrder = (int)(Math.log(buckets.size()) / Math.log(2));
-		roundRobinNum = buckets.size() + 1 - (1 << roundRobinOrder);
+		roundRobinOrder = (int)(Math.log(buckets.size()) / Math.log(2)) + 1;
+		roundRobinNum = buckets.size() - (1 << roundRobinOrder);
 		
 		// For posterity.
 		return true;
@@ -187,7 +187,7 @@ public class IndexMechanismImpl implements IIndexMechanism
 			// If the addition caused an overflow, split a bucket via round robin.
 			if (buckets.get(bucketNum).hasOverflow())
 			{
-				buckets.add(buckets.get(bucketNum).split(roundRobinOrder));
+				buckets.add(buckets.get(roundRobinNum).split(roundRobinOrder + 1));
 
 				// Increment the round robin numbers appropriately.
 				roundRobinNum++;

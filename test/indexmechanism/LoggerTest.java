@@ -57,8 +57,8 @@ public class LoggerTest {
 		indexMechanism.put("20", "data");
 		IndexMechanismImpl.indexMechanisms.clear();
 		indexMechanism = IndexMechanismImpl.getInstance(testLoggerDB);
-		assertEquals(3, indexMechanism.roundRobinOrder);
-		assertEquals(1, indexMechanism.roundRobinNum);
+		assertEquals(5, indexMechanism.roundRobinOrder);
+		assertEquals(4, indexMechanism.roundRobinNum);
 	}
 
 }
