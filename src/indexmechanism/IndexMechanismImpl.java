@@ -42,7 +42,7 @@ public class IndexMechanismImpl implements IIndexMechanism
 	{	
 		databaseFolder = folder + "/";
 		roundRobinNum = 0;
-		roundRobinOrder = 2;
+		roundRobinOrder = 3;
 		buckets = new ArrayList<Bucket>();
 
 		// Add four empty buckets.
@@ -159,7 +159,7 @@ public class IndexMechanismImpl implements IIndexMechanism
 		
 		// Calculate the round robin number/order based on the number of buckets.
 		roundRobinOrder = (int)(Math.log(buckets.size()) / Math.log(2)) + 1;
-		roundRobinNum = buckets.size() - (1 << roundRobinOrder);
+		roundRobinNum = buckets.size() - (1 << (roundRobinOrder - 1));
 		
 		// For posterity.
 		return true;
@@ -187,11 +187,11 @@ public class IndexMechanismImpl implements IIndexMechanism
 			// If the addition caused an overflow, split a bucket via round robin.
 			if (buckets.get(bucketNum).hasOverflow())
 			{
-				buckets.add(buckets.get(roundRobinNum).split(roundRobinOrder + 1));
+				buckets.add(buckets.get(roundRobinNum).split(roundRobinOrder));
 
 				// Increment the round robin numbers appropriately.
 				roundRobinNum++;
-				if (roundRobinNum == ((1 << roundRobinOrder) - 1))
+				if (roundRobinNum == (1 << (roundRobinOrder - 1)))
 				{
 					roundRobinOrder++;
 					roundRobinNum = 0;
